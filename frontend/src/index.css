@@ -41,7 +41,7 @@
     line-height: 1.65;
   }
   h1, h2, h3, h4, h5, h6, .font-serif, .font-display {
-    font-family: 'Fraunces', 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+    font-family: 'New Spirit', 'Fraunces', 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
     font-optical-sizing: auto;
     letter-spacing: -0.01em;
     font-weight: 500;
@@ -92,5 +92,5 @@ input:focus-visible, textarea:focus-visible, select:focus-visible {
   border-color: #4A7C78 !important;
 }
 
-/* Fraunces variable — soft italic weight for editorial quotes */
-.bb-italic-serif { font-family: 'Fraunces', serif; font-style: italic; font-weight: 400; }
+/* Fraunces variable — soft italic weight for editorial quotes (fallback when New Spirit unavailable) */
+.bb-italic-serif { font-family: 'New Spirit', 'Fraunces', serif; font-style: italic; font-weight: 400; }

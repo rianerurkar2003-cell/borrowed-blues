@@ -27,7 +27,7 @@ function Shell({ children }) {
           <img
             src={LOGO_URL}
             alt="Borrowed Blues"
-            className="h-9 w-auto"
+            className="h-11 w-auto"
             style={{ filter: "invert(1)" }}
             draggable={false}
           />

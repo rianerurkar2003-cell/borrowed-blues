@@ -24,7 +24,7 @@ function Shell({ children }) {
     <div className="min-h-screen bg-bb-cream flex" data-testid="client-portal">
       <aside className="w-[248px] shrink-0 hidden md:flex flex-col border-r border-bb-moss/60 bg-bb-warm px-6 py-8">
         <Link to="/" className="flex items-center mb-10">
-          <img src={LOGO_URL} alt="Borrowed Blues" className="h-9 w-auto" draggable={false} />
+          <img src={LOGO_URL} alt="Borrowed Blues" className="h-11 w-auto" draggable={false} />
         </Link>
         <p className="bb-eyebrow mb-3">Your portal</p>
         <nav className="flex flex-col gap-1">

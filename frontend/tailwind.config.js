@@ -8,9 +8,9 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        serif: ["Fraunces", "Playfair Display", "Cormorant Garamond", "Georgia", "serif"],
+        serif: ["New Spirit", "Fraunces", "Playfair Display", "Cormorant Garamond", "Georgia", "serif"],
         sans: ["Manrope", "ui-sans-serif", "system-ui", "sans-serif"],
-        display: ["Fraunces", "Playfair Display", "serif"],
+        display: ["New Spirit", "Fraunces", "Playfair Display", "serif"],
       },
       colors: {
         // Brand palette

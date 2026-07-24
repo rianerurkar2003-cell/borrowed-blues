@@ -14,7 +14,7 @@ const NAV = [
 function Logo({ className = "" }) {
   return (
     <Link to="/" data-testid="bb-logo" className={`inline-flex items-center ${className}`}>
-      <img src={LOGO_URL} alt="Borrowed Blues" className="h-10 md:h-11 w-auto select-none" draggable={false} />
+      <img src={LOGO_URL} alt="Borrowed Blues" className="h-14 md:h-16 w-auto select-none" draggable={false} />
     </Link>
   );
 }
@@ -31,7 +31,7 @@ function Header() {
       data-testid="public-header"
       className="sticky top-0 z-40 backdrop-blur-md bg-bb-cream/85 border-b border-bb-moss/50"
     >
-      <div className="bb-container flex items-center justify-between h-[76px]">
+      <div className="bb-container flex items-center justify-between h-[92px]">
         <Logo />
         <nav className="hidden md:flex items-center gap-9">
           {NAV.map((n) => (
