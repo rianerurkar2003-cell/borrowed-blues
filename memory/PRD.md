@@ -1,51 +1,87 @@
 # Borrowed Blues — Product Requirements
 
 ## Problem Statement
-Build a therapy companion platform combining a public marketing site and authenticated portals for a client and therapist. The experience must feel gentle, editorial, human, hopeful, calm, nature-inspired, reflective, and minimal — never clinical, corporate, hospital-like, cold, or overly decorative. The website reduces uncertainty around beginning therapy; the portal supports the therapeutic relationship between sessions.
+Therapy companion platform combining a public marketing site and authenticated portals. Must feel gentle, editorial, human, hopeful, calm, nature-inspired, reflective, minimal — never clinical, corporate, hospital-like, cold, or overly decorative.
 
-## User Personas
-- **Prospective client** — arrives via the public site to understand what therapy is and what to expect.
-- **Active client** — logs in to see upcoming session, latest summary, homework, journal, and resources.
-- **Therapist** — logs in to see today's schedule, upcoming sessions, consultation requests, recent reflections, and manage clients, notes, homework and resources.
+## Personas
+- **Prospective client** — arrives via the public site to understand what therapy is and what to expect
+- **Active client** — logs in to see upcoming session, latest summary, homework, journal, resources
+- **Therapist (Anushka Prabhu)** — logs in to see today's schedule, requests, reflections, and manage clients, notes, homework, resources
 
-## Core Requirements (from spec)
-- Public site: Home, About Therapy, Meet Your Therapist, Resources
-- Single Login page (email + password + remember + forgot)
-- Auto role-based redirect (therapist ⇒ therapist dashboard, client ⇒ client dashboard)
-- Client portal: Dashboard, Appointments, Journal, Homework, Resources, Profile
-- Therapist portal: Dashboard, Clients, Calendar, Requests, Resources, Profile
-- Watercolor illustration language (birds, water/estuary, eucalyptus, saplings); illustrations progressively quieter through experience
-- Typography: Fraunces (serif) headings + Manrope body; palette of forest, teal, sage, moss, cream, warm white, dusty blue
+## Architecture (current)
 
-## Architecture
-- **Backend**: FastAPI + Motor (MongoDB), JWT httpOnly-cookie auth (bcrypt), role guards, seeded therapist + client + resources + example appointments/notes/homework/reflection/consultation requests on startup
-- **Frontend**: React 19, react-router 7, Tailwind + shadcn primitives, sonner toasts, custom SVG watercolor placeholders
-- **Auth**: `/api/auth/{register,login,logout,me,refresh,forgot-password,reset-password}` — SameSite=None; Secure; HttpOnly cookies; email-normalised brute-force lockout (X-Forwarded-For aware)
+### Backend (`/app/backend/`)
+```
+server.py              # thin FastAPI factory: middleware + routers + exception handlers + startup
+config.py              # env vars, fail-fast on missing
+db.py                  # Motor client + create_indexes()
+security.py            # bcrypt + JWT helpers, cookie helpers
+deps.py                # get_current_user + require_role dependency factory
+models.py              # Pydantic input models + clean() helper
+seed.py                # startup seed: therapist + client + profile + samples
+routers/
+  auth.py              # /api/auth/*
+  public.py            # /api/, /therapist/profile, /resources/public, /consultation-requests
+  therapist.py         # /api/therapist/*
+  client.py            # /api/client/*
+```
+Mongo indexes: `users.email` unique, `users.role`, appointment hot-paths on (therapist_id,date) and (client_id,date) and status, session_notes/homework/reflections on (owner_id, created_at desc), resources on (is_public, category), consultation_requests on (status, created_at desc), TTL on password reset tokens.
 
-## Implemented — 2026-02
-- Public site (Home, About Therapy, Meet Your Therapist, Resources) with editorial hero, pillars, therapy journey, FAQ accordion, therapist profile pulled from DB, filterable/searchable resource library
-- Single Login page with illustrated left panel, remember me, forgot-password flow (mocked email — link logged server-side)
-- Client Portal: dashboard, appointments (view + request), journal (create with drafts + moods + list), homework (writing + checklist with per-item toggle), resources list, profile
-- Therapist Portal: dashboard, clients (session notes + homework assignment per client), calendar (schedule + status transitions), consultation requests (accept/decline), resources (create), profile
-- Role-based route protection with automatic redirect
-- Seeded demo data on startup for both personas
+### Frontend (`/app/frontend/src/`)
+```
+App.js                    # BrowserRouter + AuthProvider + QueryClient + ErrorBoundary + Suspense + React.lazy
+lib/
+  types.ts                # domain types (User, Appointment, Homework, ...)
+  http.ts                 # typed axios + 401 auto-refresh + AppError normalisation
+  errors.ts               # AppError class + toAppError()
+  api.js                  # compat shim → lib/http
+services/
+  auth.service.ts
+  therapist.service.ts
+  client.service.ts
+  public.service.ts
+state/
+  AuthContext.tsx         # typed, memoised auth state
+context/AuthContext.jsx   # compat shim → state/AuthContext
+shared/components/
+  PortalShell.jsx         # single shared portal shell (theme prop)
+  ErrorBoundary.tsx       # brand-styled top-level fallback
+  ProtectedRoute.jsx      # role-based route guard
+components/ProtectedRoute.jsx  # compat shim → shared/components/ProtectedRoute
+components/               # PublicLayout, Watercolor (assets), ConsultationDialog
+features/
+  client/
+    index.jsx             # router
+    nav.js
+    ClientDashboard.jsx, Appointments.jsx, Journal.jsx, Homework.jsx,
+    ClientResources.jsx, ClientProfile.jsx
+  therapist/
+    index.jsx             # router
+    nav.js
+    TherapistDashboard.jsx, Clients.jsx, CalendarView.jsx, Requests.jsx,
+    TherapistResources.jsx, TherapistProfile.jsx
+pages/                    # Home, AboutTherapy, MeetTherapist, Resources, Login
+```
 
-## Verified — 2026-02 (iteration 1)
-- Backend: 20/21 pytest cases passing (auth, role guards, all portal endpoints, seeded data, forgot flow)
-- Frontend: 100% of tested user flows (Playwright)
-- Brute-force lockout key fixed to be resilient behind K8s ingress (uses email + X-Forwarded-For)
+## Verification history
+- **Iteration 1**: 20/21 backend pytest + 100% frontend flows on the initial MVP
+- **Iteration 2**: NavLink active-state fix verified 12/12 routes
+- **Iteration 3**: Post-refactor regression pass (large TS/feature-folder move) — sign-out landing regression flagged
+- **Iteration 4**: Sign-out fix + consultation success state verified — 20/20 spec checks
+- **Iteration 5** (this): Backend modular restructure — full regression against monolithic behaviour
 
-## Deferred / Prioritised Backlog
-- **P1** — Real Google Calendar integration (currently architected only)
-- **P1** — Rich text editor + attachments for reflections and session notes
-- **P2** — Editable therapist profile from the therapist portal
-- **P2** — Client-side reschedule/cancel appointment
-- **P2** — Bookmark button on resources for clients
-- **P2** — Notification badges on portal nav (new homework, new summaries, new resources) + email digests
-- **P3** — Split `server.py` into `routers/{auth,therapist,client}.py`
-- **P3** — Custom shadcn Calendar + Time picker to replace native inputs
+## Deferred / Backlog
+- **P1** — Real Google Calendar integration (architected only, MOCKED)
+- **P1** — Adobe Fonts kit for real New Spirit rendering (Fraunces is the fallback)
+- **P1** — Anushka's real portrait for Meet Your Therapist (watercolor placeholder in use)
+- **P2** — Migrate feature pages from `useState + useEffect` → React Query `useQuery`/`useMutation` (provider already mounted)
+- **P2** — Retire three remaining frontend compat shims (`context/AuthContext.jsx`, `lib/api.js`, `components/ProtectedRoute.jsx`) once the 5 pages still using them are updated to canonical imports
+- **P2** — Convert `ProtectedRoute` sentinel union → discriminated union (`"loading" | "anonymous" | User`)
+- **P2** — Client-side reschedule/cancel appointment; bookmark button on resources; notification badges on portal nav
+- **P3** — Rich text editor + attachments for reflections and session notes
 
-## Next Actions
-1. Upload the exact watercolor SVG/PNG assets from Figma and swap them into `/app/frontend/src/components/Watercolor.jsx`
-2. Provide the real therapist bio/qualifications to replace the seeded placeholder profile
-3. Decide whether Google Calendar sync is P0 or can remain deferred
+## Environment variables (backend/.env)
+`MONGO_URL`, `DB_NAME`, `JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `CLIENT_SEED_EMAIL`, `CLIENT_SEED_PASSWORD`, `CORS_ORIGINS`. All required (config.py fails fast on missing).
+
+## Test credentials
+See `/app/memory/test_credentials.md`.
