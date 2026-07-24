@@ -1,56 +1,75 @@
 import { useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import PublicLayout from "@/components/PublicLayout";
+import Home from "@/pages/Home";
+import AboutTherapy from "@/pages/AboutTherapy";
+import MeetTherapist from "@/pages/MeetTherapist";
+import Resources from "@/pages/Resources";
+import Login from "@/pages/Login";
+import ClientPortal from "@/pages/ClientPortal";
+import TherapistPortal from "@/pages/TherapistPortal";
 import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
-import { HOME } from "@/constants/testIds";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+function ScrollToTop() {
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+  return null;
+}
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
+function AutoRedirect() {
+  const { user } = useAuth();
+  if (user === null) return null;
+  if (user && user.role === "therapist") return <Navigate to="/therapist" replace />;
+  if (user && user.role === "client") return <Navigate to="/portal" replace />;
+  return <Navigate to="/login" replace />;
+}
 
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
+function Public({ children }) {
   return (
-    <div>
-      <header className="App-header">
-        <a
-          data-testid={HOME.emergentLink}
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
-
-function App() {
-  return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </div>
+    <>
+      <ScrollToTop />
+      <PublicLayout>{children}</PublicLayout>
+    </>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <div className="App" data-testid="app-root">
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Public><Home /></Public>} />
+            <Route path="/about-therapy" element={<Public><AboutTherapy /></Public>} />
+            <Route path="/meet-your-therapist" element={<Public><MeetTherapist /></Public>} />
+            <Route path="/resources" element={<Public><Resources /></Public>} />
+            <Route path="/login" element={<Login />} />
+
+            <Route
+              path="/portal/*"
+              element={
+                <ProtectedRoute role="client">
+                  <ClientPortal />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/therapist/*"
+              element={
+                <ProtectedRoute role="therapist">
+                  <TherapistPortal />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route path="/dashboard" element={<AutoRedirect />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+          <Toaster position="top-center" richColors closeButton />
+        </BrowserRouter>
+      </AuthProvider>
+    </div>
+  );
+}

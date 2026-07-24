@@ -1,0 +1,45 @@
+{
+  "summary": "Full backend + frontend regression for Borrowed Blues. 20/21 pytest cases pass. All public pages, login flow, role-based redirects, therapist portal (dashboard, clients, calendar, requests) and client portal (dashboard, journal save, homework, appointments request) render and function correctly. One backend defect found: brute-force lockout does not trigger through the ingress because request.client.host varies across proxy pods, splitting the attempt counter.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "POST /api/auth/login",
+        "issue": "Brute-force lockout keyed on request.client.host+email. Behind the K8s ingress the client IP alternates between at least two proxy IPs (10.79.151.158 / 10.79.151.159), so 6 consecutive wrong logins from the same real client produced [401,401,401,401,401,401,401] and never hit 429. Confirmed in Mongo (login_attempts had counts split 4/2 across two identifiers). Fix: honour X-Forwarded-For (first hop) or drop the IP portion and rate-limit on email alone with a small delay."
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "/portal/appointments (and /therapist/calendar)",
+        "issues": ["Uses native browser date + time inputs (mm/dd/yyyy, HH:MM). Style guideline suggests shadcn Calendar/Time picker for editorial feel; low priority."]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Fix brute-force lockout so it accumulates per real client (use X-Forwarded-For or email-only key)."
+  ],
+  "critical_code_review_comments": [
+    "server.py is 863 lines - approaching split-threshold (700). Consider splitting into routers/auth.py, routers/therapist.py, routers/client.py, seed.py.",
+    "CORS: allow_credentials=True combined with allow_origin_regex='.*' echoes any Origin; acceptable for preview but tighten in production to FRONTEND_URL only.",
+    "brute-force detection uses request.client.host without honouring X-Forwarded-For - unreliable behind ingress/LB (see backend_issues).",
+    "PATCH /therapist/appointments/{id} and PATCH /therapist/requests/{id} accept raw dict payloads with no Pydantic validation. Consider typed update models.",
+    "GET /client/resources returns all resources including is_public=False; should probably filter or respect is_public.",
+    "seed_admin_and_data correctly re-hashes admin/client passwords when env-provided password no longer matches (good, idempotent)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "95% (20/21 pytest)", "frontend": "100% of tested flows"},
+  "test_credentials": "therapist@borrowedblues.com / TherapistPass123!; client@borrowedblues.com / ClientPass123!",
+  "seed_data_creation": "None beyond what backend seed produces; test data prefixed TEST_ was created (a client user, appointment, session note, homework, reflection) via API - safe to leave.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "backend_test.py under /app/backend/tests covers public API, auth (login/register/logout/me/forgot/lockout), role guards for all therapist+client endpoints, full therapist flow (appointments, notes, homework, requests) and client flow (dashboard, appointment request, reflection create+list, homework toggle). Playwright verified role-based redirects both directions plus logout gating. The lockout test is the only failure and needs a backend fix before it will pass end-to-end.",
+  "rca of the issue": "Brute-force counter identifier = f'{request.client.host}:{email}'. K8s ingress proxies requests to the app pod from multiple worker IPs. Each request may show a different client.host, so counts never reach 5 for a single identifier. Verified in db.login_attempts. Repro: from any external client POST 6x /api/auth/login with a bogus email+password - all return 401, none return 429. Mitigation: parse X-Forwarded-For (first IP) OR key rate-limit on email only OR configure uvicorn --proxy-headers with a trusted forwarder list."
+}
