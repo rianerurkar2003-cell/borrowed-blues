@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { api, formatApiError } from "@/lib/api";
+import { http as api } from "@/lib/http";
+import { toAppError } from "@/lib/errors";
 import { toast } from "sonner";
 import { WatercolorPair, WatercolorSapling } from "@/components/Watercolor";
 import { Send, Check, ArrowRight } from "lucide-react";
@@ -47,7 +48,7 @@ export default function ConsultationDialog({ children, defaultReason = "" }) {
       setDone(true);
       toast.success("Your note is on its way.");
     } catch (err) {
-      toast.error(formatApiError(err.response?.data?.detail) || err.message);
+      toast.error(toAppError(err).message);
     } finally {
       setBusy(false);
     }

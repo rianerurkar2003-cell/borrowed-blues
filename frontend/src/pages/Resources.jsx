@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { api } from "@/lib/api";
+import { http as api } from "@/lib/http";
 import { WatercolorEucalyptus, WatercolorBird } from "@/components/Watercolor";
 import { Search, FileText, BookOpen, Video, Link as LinkIcon } from "lucide-react";
 

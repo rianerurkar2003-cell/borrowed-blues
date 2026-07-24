@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { http as api } from "@/lib/http";
 import { WatercolorEucalyptus, WatercolorBird, WatercolorSapling, WatercolorRipple } from "@/components/Watercolor";
 import ConsultationDialog from "@/components/ConsultationDialog";
 import { ArrowRight } from "lucide-react";

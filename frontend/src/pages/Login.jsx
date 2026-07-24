@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/state/AuthContext";
 import { WatercolorEstuary, WatercolorBird } from "@/components/Watercolor";
 import { toast } from "sonner";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
-import { api, formatApiError } from "@/lib/api";
+import { http as api } from "@/lib/http";
+import { toAppError } from "@/lib/errors";
 
 export default function Login() {
   const { login } = useAuth();
@@ -38,7 +39,7 @@ export default function Login() {
       toast.success("If that email exists, a quiet reset link has been sent.");
       setForgotOpen(false);
     } catch (err) {
-      toast.error(formatApiError(err.response?.data?.detail) || err.message);
+      toast.error(toAppError(err).message);
     }
   };
 
