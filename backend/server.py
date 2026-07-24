@@ -674,45 +674,67 @@ async def seed_admin_and_data():
         await db.users.update_one({"email": c_email},
                                    {"$set": {"password_hash": hash_password(c_pw)}})
 
-    # Public therapist profile
-    if not await db.therapist_profile.find_one({"slug": "primary"}):
-        await db.therapist_profile.insert_one({
+    # Public therapist profile — upsert on every startup so seed content stays fresh.
+    await db.therapist_profile.update_one(
+        {"slug": "primary"},
+        {"$set": {
             "slug": "primary",
-            "name": "Dr. Anaya Verma",
-            "title": "Licensed Psychotherapist",
+            "name": "Your Therapist",
+            "title": "Counselling Psychologist",
             "personal_note": (
-                "I believe therapy is a space where you can show up just as you are, "
-                "without the pressure to have everything figured out. Whether you're "
-                "navigating a difficult chapter, feeling overwhelmed, or simply trying "
-                "to understand yourself better, our conversations will move at a pace "
-                "that feels right for you."
+                "My decision to start a private practice came from a desire to "
+                "prioritise my own mental health and create a way of working that "
+                "allows me to be fully present — with both my clients and in my "
+                "personal life. I believe that being able to show up authentically "
+                "and without being consumed by work enables me to offer more "
+                "thoughtful and compassionate care."
             ),
             "approach": (
-                "My approach is person-centred and collaborative. Rather than telling "
-                "you what to do, I aim to create a safe, supportive space where we can "
-                "explore your thoughts, emotions, and experiences together. Every "
-                "person's journey is different, and therapy should reflect that."
+                "Beginning therapy can feel daunting, and I will do my best to make "
+                "the process as seamless and comfortable as possible. I've built this "
+                "practice with the intention of creating a space where people from "
+                "all walks of life feel understood and held as they explore the "
+                "challenges they are facing — or simply try to make sense of life. "
+                "Therapy is not a one-size-fits-all process; each person's needs, "
+                "experiences, and goals deserve thoughtful consideration. My approach "
+                "is collaborative, flexible, and always open to conversation, so we "
+                "can shape the therapeutic journey together in a way that feels "
+                "meaningful and supportive for you."
             ),
             "qualifications": [
-                {"label": "Education", "value": "M.Phil. Clinical Psychology, NIMHANS"},
-                {"label": "Experience", "value": "9 years of one-on-one therapeutic practice"},
-                {"label": "Memberships", "value": "Indian Association of Clinical Psychologists"},
+                {"label": "Education", "value": (
+                    "M.A. Psychology (Clinical), Mumbai University · "
+                    "Certificate in Solution-Focused Brief Therapy · "
+                    "Certificate in Transactional Analysis (TA 101) · "
+                    "Certificate course in Gottman's Couple Therapy · "
+                    "Certificate course in Rational Emotive Behavioural Therapy "
+                    "and Acceptance and Commitment Therapy"
+                )},
+                {"label": "Experience", "value": (
+                    "School Counsellor (1 year) · "
+                    "Counselling Psychologist at AYJNISHD (1 year) · "
+                    "Private Practice (since May 2025)"
+                )},
                 {"label": "Languages", "value": "English, Hindi, Marathi"},
-                {"label": "Specialisations", "value": "Anxiety, Grief, Relational trauma, Burnout"},
             ],
-            "areas": ["Anxiety", "Stress", "Self-esteem", "Grief", "Burnout",
-                      "Relationships", "Life transitions", "Identity"],
+            "areas": [
+                "Anxiety", "Depression", "Relationship issues", "Body image issues",
+                "Rumination", "Self-image issues", "Stress management",
+                "Anger management", "Interpersonal problems",
+            ],
             "pillars": [
                 {"title": "Compassion",
-                 "body": "You deserve a space where you feel heard without judgement."},
+                 "body": "A space where you feel understood and held, without judgement."},
                 {"title": "Collaboration",
-                 "body": "Therapy is something we build together."},
-                {"title": "Evidence-Based",
-                 "body": "My work is informed by research and tailored to your needs."},
-                {"title": "Growth",
-                 "body": "Progress doesn't have to be perfect to be meaningful."},
+                 "body": "Therapy is something we shape together, in conversation."},
+                {"title": "Flexibility",
+                 "body": "No one-size-fits-all. Your needs and goals guide the work."},
+                {"title": "Presence",
+                 "body": "Being fully here, so care can be thoughtful and unhurried."},
             ],
-        })
+        }},
+        upsert=True,
+    )
 
     # Sample public resources
     if await db.resources.count_documents({}) == 0:

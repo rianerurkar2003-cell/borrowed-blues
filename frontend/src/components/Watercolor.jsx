@@ -1,157 +1,145 @@
 import React from "react";
 
 /**
- * Watercolor SVG placeholders — soft, hand-painted feel using layered
- * gaussian-blurred organic blobs. Meant to stand in for the user's own
- * watercolor assets until uploaded. All strictly on-brand: forest, sage,
- * teal, dusty blue, cream. No saturated hues.
+ * Real watercolor assets uploaded by the client. Each exported component
+ * accepts a `className` and renders a plain <img>. Component names are
+ * unchanged so the rest of the app doesn't need updates; a few extra
+ * variants are exported for richer pillar/journey imagery.
+ *
+ * Mapping:
+ *  - home page.webp                  → WatercolorEstuary   (hero landscape)
+ *  - About therapy art.png           → WatercolorRiver     (wide river band)
+ *  - watercolour stamp 9.png         → WatercolorRipple    (2 birds by water, small)
+ *  - watercolour stamp 3.png         → WatercolorBird      (single bird on branch)
+ *  - watercolour stamp 4.png         → WatercolorPair      (two birds on eucalyptus)
+ *  - watercolour stamp 2.png         → WatercolorFlock     (three birds among leaves)
+ *  - about therapy page art 2.png    → WatercolorBirdsLarge (three bluebirds hero art)
+ *  - about therapy hero art.png      → WatercolorEucalyptus (eucalyptus + berries + bird)
+ *  - watercolour art 3.png           → WatercolorSapling   (sapling on soil)
+ *  - watercolour stamp 6.png         → WatercolorStamp     (tiny mark, dashboard accents)
  */
 
-const Filters = () => (
-  <defs>
-    <filter id="wc-blur" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="7" />
-    </filter>
-    <filter id="wc-soft" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="3.5" />
-    </filter>
-    <filter id="wc-grain">
-      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/>
-      <feColorMatrix values="0 0 0 0 0.11 0 0 0 0 0.22 0 0 0 0 0.16 0 0 0 0.20 0"/>
-      <feComposite in2="SourceGraphic" operator="in"/>
-    </filter>
-  </defs>
+const ASSET = {
+  estuary:      "https://customer-assets-wrfwihn1.emergentagent.net/job_calm-therapy-app/artifacts/tn8yiytw_home%20page.webp",
+  river:        "https://customer-assets-cm19k8pv.emergentagent.net/job_5324cc8f-7830-4d4f-b5e3-d39decfbd68c/artifacts/12pmwvam_About%20therapy%20art.png",
+  ripple:       "https://customer-assets-wrfwihn1.emergentagent.net/job_calm-therapy-app/artifacts/cc1b59cn_watercolour%20stamp%209.png",
+  bird:         "https://customer-assets-wrfwihn1.emergentagent.net/job_calm-therapy-app/artifacts/paqx9jpy_Watercolour%20stamp%203.png",
+  pair:         "https://customer-assets-wrfwihn1.emergentagent.net/job_calm-therapy-app/artifacts/smnsogc8_Watercolour%20stamp%204.png",
+  flock:        "https://customer-assets-wrfwihn1.emergentagent.net/job_calm-therapy-app/artifacts/4rgnzfk3_Watercolour%20stamp%202.png",
+  birdsLarge:   "https://customer-assets-wrfwihn1.emergentagent.net/job_calm-therapy-app/artifacts/9xb9ghh1_about%20therapy%20page%20art%202.png",
+  eucalyptus:   "https://customer-assets-wrfwihn1.emergentagent.net/job_calm-therapy-app/artifacts/49x3kmri_about%20therapy%20hero%20art.png",
+  sapling:      "https://customer-assets-wrfwihn1.emergentagent.net/job_calm-therapy-app/artifacts/2j39iv5k_watercolour%20art%203.png",
+  stamp:        "https://customer-assets-wrfwihn1.emergentagent.net/job_calm-therapy-app/artifacts/4atr4rz7_watercolour%20stamp%206.png",
+};
+
+const Img = ({ src, alt, className = "", position = "center", contain = true, style }) => (
+  <img
+    src={src}
+    alt={alt}
+    loading="lazy"
+    className={`w-full h-full ${contain ? "object-contain" : "object-cover"} select-none pointer-events-none ${className}`}
+    style={{ objectPosition: position, ...(style || {}) }}
+    draggable={false}
+  />
 );
 
-/** Estuary + hills + sky — hero landscape. Fills its container. */
+/** Hero landscape — full-bleed background for home hero + login side panel. */
 export function WatercolorEstuary({ className = "" }) {
   return (
-    <svg viewBox="0 0 1600 900" className={className} preserveAspectRatio="xMidYMid slice" aria-hidden>
-      <Filters />
-      <rect width="1600" height="900" fill="#F9F6F0"/>
-      {/* sky wash */}
-      <g filter="url(#wc-blur)" opacity="0.9">
-        <ellipse cx="800" cy="140" rx="1100" ry="220" fill="#E8EEE7"/>
-        <ellipse cx="1200" cy="80" rx="600" ry="120" fill="#D8E2D8"/>
-      </g>
-      {/* far hills */}
-      <g filter="url(#wc-soft)">
-        <path d="M0,520 Q300,380 620,430 T1200,410 T1600,470 L1600,900 L0,900 Z" fill="#4A7C78" opacity="0.55"/>
-        <path d="M0,600 Q260,470 560,520 T1080,510 T1600,560 L1600,900 L0,900 Z" fill="#1C3829" opacity="0.85"/>
-      </g>
-      {/* water */}
-      <g filter="url(#wc-blur)" opacity="0.85">
-        <path d="M0,720 Q400,660 800,700 T1600,700 L1600,900 L0,900 Z" fill="#789B9F"/>
-        <path d="M0,780 Q500,740 900,770 T1600,760 L1600,900 L0,900 Z" fill="#B7CCD1" opacity="0.8"/>
-      </g>
-      {/* birds */}
-      <g fill="#1C3829" opacity="0.7">
-        <path d="M420 160 q10 -12 22 0 q12 -12 22 0" stroke="#1C3829" strokeWidth="2.4" fill="none" strokeLinecap="round"/>
-        <path d="M520 130 q9 -11 18 0 q9 -11 18 0" stroke="#1C3829" strokeWidth="2" fill="none" strokeLinecap="round"/>
-        <path d="M370 220 q7 -8 14 0 q7 -8 14 0" stroke="#1C3829" strokeWidth="1.8" fill="none" strokeLinecap="round"/>
-      </g>
-      {/* eucalyptus sprig, right */}
-      <g transform="translate(1200,540)" opacity="0.85">
-        <path d="M0 0 C 40 -60 120 -120 220 -140" stroke="#1C3829" strokeWidth="2" fill="none"/>
-        {[[10,-20],[40,-50],[80,-80],[130,-110],[180,-130]].map(([x,y],i)=>(
-          <ellipse key={i} cx={x} cy={y} rx="18" ry="10" fill="#4A7C78" opacity="0.9" transform={`rotate(-30 ${x} ${y})`}/>
-        ))}
-      </g>
-      <rect width="1600" height="900" fill="transparent" filter="url(#wc-grain)" opacity="0.4"/>
-    </svg>
+    <div className={`relative overflow-hidden ${className}`}>
+      <Img src={ASSET.estuary} alt="A watercolor estuary edged by wildflowers with birds in the distance." contain={false} position="center 40%" />
+    </div>
   );
 }
 
+/** Wide river ribbon — decorative continuity band. */
+export function WatercolorRiver({ className = "" }) {
+  return (
+    <div className={`relative overflow-hidden ${className}`}>
+      <Img src={ASSET.river} alt="A watercolor river flowing across the page." />
+    </div>
+  );
+}
+
+/** Two bluebirds beside a rippling pool — used for the 'Reflect' motif. */
 export function WatercolorRipple({ className = "" }) {
   return (
-    <svg viewBox="0 0 400 400" className={className} aria-hidden>
-      <Filters />
-      <g filter="url(#wc-blur)">
-        <circle cx="200" cy="200" r="150" fill="#B7CCD1" opacity="0.55"/>
-        <circle cx="200" cy="200" r="110" fill="#789B9F" opacity="0.55"/>
-        <circle cx="200" cy="200" r="70" fill="#4A7C78" opacity="0.6"/>
-      </g>
-      <g fill="none" stroke="#1C3829" strokeWidth="1.3" opacity="0.5">
-        <circle cx="200" cy="200" r="140"/>
-        <circle cx="200" cy="200" r="100"/>
-        <circle cx="200" cy="200" r="60"/>
-      </g>
-    </svg>
+    <div className={`relative overflow-hidden ${className}`}>
+      <Img src={ASSET.ripple} alt="Two watercolor bluebirds beside a rippling pool of water." />
+    </div>
   );
 }
 
+/** Single bird on a branch — the 'Guidance' motif. */
 export function WatercolorBird({ className = "" }) {
   return (
-    <svg viewBox="0 0 400 400" className={className} aria-hidden>
-      <Filters />
-      <g filter="url(#wc-soft)">
-        <ellipse cx="200" cy="220" rx="90" ry="55" fill="#4A7C78" opacity="0.85"/>
-        <ellipse cx="270" cy="200" rx="40" ry="28" fill="#1C3829" opacity="0.9"/>
-        <path d="M120 210 Q140 160 220 180" stroke="#789B9F" strokeWidth="16" fill="none" strokeLinecap="round" opacity="0.7"/>
-        <circle cx="285" cy="192" r="3" fill="#F9F6F0"/>
-        <path d="M300 202 L320 208 L302 214 Z" fill="#B4552D" opacity="0.7"/>
-      </g>
-      {/* branch */}
-      <path d="M40 300 Q160 280 260 300" stroke="#1C3829" strokeWidth="2" fill="none"/>
-      {[[80,296],[130,290],[180,292],[220,296]].map(([x,y],i)=>(
-        <ellipse key={i} cx={x} cy={y-8} rx="14" ry="7" fill="#4A7C78" opacity="0.8" transform={`rotate(-20 ${x} ${y})`}/>
-      ))}
-    </svg>
+    <div className={`relative overflow-hidden ${className}`}>
+      <Img src={ASSET.bird} alt="A small watercolor bluebird resting on a eucalyptus branch." />
+    </div>
   );
 }
 
+/** Two birds side by side — used for 'Book' / relational moments. */
+export function WatercolorPair({ className = "" }) {
+  return (
+    <div className={`relative overflow-hidden ${className}`}>
+      <Img src={ASSET.pair} alt="Two watercolor bluebirds together on a eucalyptus branch." />
+    </div>
+  );
+}
+
+/** Small flock of three flying birds — 'Understanding' / departure motif. */
+export function WatercolorFlock({ className = "" }) {
+  return (
+    <div className={`relative overflow-hidden ${className}`}>
+      <Img src={ASSET.flock} alt="Three watercolor bluebirds mid-flight among eucalyptus leaves." />
+    </div>
+  );
+}
+
+/** Larger bluebirds composition — pillar / editorial cards. */
+export function WatercolorBirdsLarge({ className = "" }) {
+  return (
+    <div className={`relative overflow-hidden ${className}`}>
+      <Img src={ASSET.birdsLarge} alt="Three bluebirds among eucalyptus branches." />
+    </div>
+  );
+}
+
+/** Eucalyptus + berries + bird — hero side art. */
 export function WatercolorEucalyptus({ className = "" }) {
   return (
-    <svg viewBox="0 0 400 500" className={className} aria-hidden>
-      <Filters />
-      <path d="M200 480 C 190 380 210 300 200 200 C 195 140 205 80 200 40" stroke="#1C3829" strokeWidth="2" fill="none"/>
-      {[...Array(9)].map((_, i) => {
-        const y = 60 + i * 45;
-        const side = i % 2 === 0 ? -1 : 1;
-        return (
-          <g key={i} filter="url(#wc-soft)">
-            <ellipse cx={200 + side * 40} cy={y} rx="34" ry="16" fill="#4A7C78" opacity="0.85" transform={`rotate(${side * 25} ${200 + side*40} ${y})`}/>
-            <ellipse cx={200 - side * 20} cy={y + 20} rx="22" ry="11" fill="#789B9F" opacity="0.75" transform={`rotate(${side * -15} ${200 - side*20} ${y+20})`}/>
-          </g>
-        );
-      })}
-    </svg>
+    <div className={`relative overflow-hidden ${className}`}>
+      <Img src={ASSET.eucalyptus} alt="Watercolor eucalyptus branches with berries and a small blue bird." position="right center" />
+    </div>
   );
 }
 
+/** Sapling on soft ground — the 'Progress / Growth' motif. */
 export function WatercolorSapling({ className = "" }) {
   return (
-    <svg viewBox="0 0 300 300" className={className} aria-hidden>
-      <Filters />
-      <path d="M150 290 L150 180" stroke="#1C3829" strokeWidth="2" fill="none"/>
-      <g filter="url(#wc-soft)">
-        <ellipse cx="120" cy="180" rx="30" ry="16" fill="#4A7C78" opacity="0.85" transform="rotate(-30 120 180)"/>
-        <ellipse cx="180" cy="170" rx="30" ry="16" fill="#789B9F" opacity="0.85" transform="rotate(30 180 170)"/>
-        <ellipse cx="150" cy="140" rx="28" ry="14" fill="#1C3829" opacity="0.7"/>
-      </g>
-      <g filter="url(#wc-blur)" opacity="0.6">
-        <ellipse cx="150" cy="270" rx="80" ry="10" fill="#B7CCD1"/>
-      </g>
-    </svg>
+    <div className={`relative overflow-hidden ${className}`}>
+      <Img src={ASSET.sapling} alt="A watercolor sapling standing on soft ground — a symbol of growth." />
+    </div>
   );
 }
 
-export function WatercolorBridge({ className = "" }) {
+/** Tiny decorative stamp — dashboard accents, footer marks. */
+export function WatercolorStamp({ className = "" }) {
   return (
-    <svg viewBox="0 0 400 300" className={className} aria-hidden>
-      <Filters />
-      <g filter="url(#wc-soft)">
-        <path d="M20 200 Q200 100 380 200" stroke="#4A7C78" strokeWidth="14" fill="none" opacity="0.8"/>
-        <path d="M20 200 Q200 110 380 200" stroke="#1C3829" strokeWidth="4" fill="none" opacity="0.6"/>
-      </g>
-      <g filter="url(#wc-blur)" opacity="0.6">
-        <path d="M0 230 Q200 210 400 230 L400 300 L0 300 Z" fill="#789B9F"/>
-      </g>
-    </svg>
+    <div className={`relative overflow-hidden ${className}`}>
+      <Img src={ASSET.stamp} alt="A quiet watercolor stamp." />
+    </div>
   );
 }
 
-/** Slim decorative flock line for headers */
+/** Backwards-compatible alias so pages that use WatercolorBridge keep working —
+ *  now shows two birds together, which reads well as 'meeting / booking'. */
+export function WatercolorBridge({ className = "" }) {
+  return <WatercolorPair className={className} />;
+}
+
+/** Slim decorative flock line — remains SVG so it can scale inline precisely. */
 export function BirdFlock({ className = "" }) {
   return (
     <svg viewBox="0 0 400 60" className={className} aria-hidden>
@@ -165,3 +153,5 @@ export function BirdFlock({ className = "" }) {
     </svg>
   );
 }
+
+export const LOGO_URL = "https://customer-assets-cm19k8pv.emergentagent.net/job_5324cc8f-7830-4d4f-b5e3-d39decfbd68c/artifacts/p9pjt9gh_Borrowed%20blues.webp";

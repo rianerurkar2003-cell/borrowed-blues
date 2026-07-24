@@ -3,7 +3,7 @@ import { NavLink, Routes, Route, Navigate, useNavigate, Link } from "react-route
 import { useAuth } from "@/context/AuthContext";
 import { api, formatApiError } from "@/lib/api";
 import { toast } from "sonner";
-import { WatercolorEucalyptus, WatercolorRipple, BirdFlock } from "@/components/Watercolor";
+import { WatercolorEucalyptus, WatercolorRipple, BirdFlock, LOGO_URL } from "@/components/Watercolor";
 import { LogOut, LayoutDashboard, Users, CalendarDays, ClipboardList, LibraryBig, User as UserIcon, Sparkles } from "lucide-react";
 
 const NAV = [

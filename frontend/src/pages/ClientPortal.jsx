@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink, Routes, Route, Navigate, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { api, formatApiError } from "@/lib/api";
-import { WatercolorBird, WatercolorSapling, WatercolorEucalyptus, WatercolorRipple, BirdFlock } from "@/components/Watercolor";
+import { WatercolorBird, WatercolorSapling, WatercolorEucalyptus, WatercolorRipple, BirdFlock, LOGO_URL } from "@/components/Watercolor";
 import { toast } from "sonner";
 import { LogOut, CalendarDays, BookHeart, ClipboardList, Sparkles, User, Home as HomeIcon, LibraryBig } from "lucide-react";
 

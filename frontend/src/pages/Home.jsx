@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { WatercolorEstuary, WatercolorRipple, WatercolorBird, WatercolorSapling, WatercolorBridge, WatercolorEucalyptus, BirdFlock } from "@/components/Watercolor";
+import { WatercolorEstuary, WatercolorRipple, WatercolorBird, WatercolorSapling, WatercolorPair, WatercolorFlock, WatercolorEucalyptus, BirdFlock } from "@/components/Watercolor";
 import { ArrowRight } from "lucide-react";
 
 const PILLARS = [
-  { title: "Understanding", body: "Learn what therapy is and how sessions typically feel." , Art: WatercolorEucalyptus },
+  { title: "Understanding", body: "Learn what therapy is and how sessions typically feel." , Art: WatercolorFlock },
   { title: "Guidance",      body: "A steady, thoughtful presence — never a script.",        Art: WatercolorBird },
   { title: "Progress",      body: "Recognise growth through reflections and small milestones.", Art: WatercolorSapling },
   { title: "Continuity",    body: "Stay connected to your therapeutic journey between sessions.", Art: WatercolorRipple },
@@ -12,7 +12,7 @@ const PILLARS = [
 
 const JOURNEY = [
   { label: "Learn",   note: "Read, wonder, notice.",         Art: WatercolorBird },
-  { label: "Book",    note: "A short consultation call.",    Art: WatercolorBridge },
+  { label: "Book",    note: "A short consultation call.",    Art: WatercolorPair },
   { label: "Session", note: "An unhurried conversation.",    Art: WatercolorEucalyptus },
   { label: "Reflect", note: "Journal between sessions.",     Art: WatercolorRipple },
   { label: "Growth",  note: "Small, steady changes.",        Art: WatercolorSapling },
@@ -37,41 +37,49 @@ export default function Home() {
   return (
     <>
       {/* HERO */}
-      <section data-testid="home-hero" className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10">
-          <WatercolorEstuary className="w-full h-full" />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-bb-cream/95" />
-        </div>
-        <div className="bb-container pt-28 pb-40 md:pt-40 md:pb-56 relative">
-          <p className="bb-eyebrow animate-fade-in" data-testid="home-eyebrow">A borrowed blues practice</p>
-          <h1
-            data-testid="home-hero-title"
-            className="mt-6 text-5xl md:text-7xl lg:text-[88px] leading-[1.03] text-bb-forest max-w-4xl animate-fade-up"
-          >
-            Begin with <span className="bb-italic-serif">clarity.</span>
-          </h1>
-          <p className="mt-8 max-w-xl text-lg md:text-xl text-bb-forest/75 leading-relaxed animate-fade-up">
-            Therapy without the fluorescent lighting. A small, private practice
-            helping you make sense of what is heavy, and gentle with what is
-            tender.
-          </p>
-          <div className="mt-10 flex flex-wrap gap-3 animate-fade-up">
-            <Link
-              to="/meet-your-therapist"
-              data-testid="hero-cta-consult"
-              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-bb-forest text-bb-cream hover:bg-bb-forest-2 transition-colors"
+      <section data-testid="home-hero" className="relative">
+        <div className="bb-container pt-16 pb-16 md:pt-20 md:pb-24 grid md:grid-cols-[1.05fr_1fr] gap-10 md:gap-14 items-center">
+          <div className="order-2 md:order-1">
+            <p className="bb-eyebrow animate-fade-in" data-testid="home-eyebrow">A borrowed blues practice</p>
+            <h1
+              data-testid="home-hero-title"
+              className="mt-6 text-5xl md:text-6xl lg:text-[80px] leading-[1.03] text-bb-forest animate-fade-up"
             >
-              Book a consultation <ArrowRight size={16} strokeWidth={1.6}/>
-            </Link>
-            <Link
-              to="/about-therapy"
-              data-testid="hero-cta-learn"
-              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full border border-bb-forest/30 text-bb-forest hover:bg-bb-moss/50 transition-colors"
-            >
-              Learn about therapy
-            </Link>
+              Begin with <span className="bb-italic-serif">clarity.</span>
+            </h1>
+            <p className="mt-7 max-w-xl text-lg md:text-xl text-bb-forest/75 leading-relaxed animate-fade-up">
+              Therapy without the fluorescent lighting. A small, private practice
+              helping you make sense of what is heavy, and gentle with what is
+              tender.
+            </p>
+            <div className="mt-9 flex flex-wrap gap-3 animate-fade-up">
+              <Link
+                to="/meet-your-therapist"
+                data-testid="hero-cta-consult"
+                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-bb-forest text-bb-cream hover:bg-bb-forest-2 transition-colors"
+              >
+                Book a consultation <ArrowRight size={16} strokeWidth={1.6}/>
+              </Link>
+              <Link
+                to="/about-therapy"
+                data-testid="hero-cta-learn"
+                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full border border-bb-forest/30 text-bb-forest hover:bg-bb-moss/50 transition-colors"
+              >
+                Learn about therapy
+              </Link>
+            </div>
+            <BirdFlock className="mt-12 w-44 opacity-60" />
           </div>
-          <BirdFlock className="mt-16 w-48 opacity-60" />
+
+          <div className="order-1 md:order-2 relative">
+            <div className="relative rounded-3xl overflow-hidden shadow-soft aspect-[4/5] md:aspect-[3/4] bg-bb-moss/30">
+              <WatercolorEstuary className="w-full h-full" />
+            </div>
+            {/* small floating bird stamp overlapping the top-left of the image */}
+            <div className="hidden md:block absolute -left-10 -top-8 w-28 h-28 opacity-95 animate-drift">
+              <WatercolorBird className="w-full h-full" />
+            </div>
+          </div>
         </div>
       </section>
 

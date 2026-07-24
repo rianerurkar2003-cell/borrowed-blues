@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { BirdFlock } from "@/components/Watercolor";
+import { BirdFlock, LOGO_URL } from "@/components/Watercolor";
 import { Menu, X } from "lucide-react";
 
 const NAV = [

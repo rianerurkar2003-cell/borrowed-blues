@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { WatercolorEucalyptus, WatercolorBird, WatercolorRipple, WatercolorSapling, WatercolorBridge } from "@/components/Watercolor";
+import { WatercolorEucalyptus, WatercolorBird, WatercolorRipple, WatercolorSapling, WatercolorPair } from "@/components/Watercolor";
 import { ArrowRight, Check, X } from "lucide-react";
 
 const IS_IS_NOT = {
@@ -10,7 +10,7 @@ const IS_IS_NOT = {
 
 const FIRST_SESSION = [
   { label: "Meet",    body: "You'll spend some time getting to know one another and discussing what brings you to therapy.", Art: WatercolorBird },
-  { label: "Share",   body: "This is your opportunity to ask about the process, confidentiality, or anything you're unsure about.", Art: WatercolorBridge },
+  { label: "Share",   body: "This is your opportunity to ask about the process, confidentiality, or anything you're unsure about.", Art: WatercolorPair },
   { label: "Reflect", body: "Together, we identify what you'd like support with and what you hope to gain from therapy.",           Art: WatercolorRipple },
   { label: "Talk",    body: "You'll have space to share your thoughts, experiences, and concerns at a pace that feels comfortable.", Art: WatercolorEucalyptus },
   { label: "Grow",    body: "You'll leave with a shared understanding of what future sessions may look like.",                     Art: WatercolorSapling },
