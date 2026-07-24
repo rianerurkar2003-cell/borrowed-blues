@@ -1,0 +1,89 @@
+{
+  "summary": "Frontend-only regression after the large TypeScript/feature-folder refactor. On first supervisor start the frontend was FATAL (CRA refused to boot because both jsconfig.json and tsconfig.json were present). I deleted the stale jsconfig.json (tsconfig.json has equivalent @/* alias) and the app compiled and served correctly. All refactor targets then verified end-to-end: Home + 3 lazy public pages render, both portals login/redirect and all 12 nav routes render their sole active entry with content, direct URLs (/therapist/calendar and /portal/journal) render correctly, protected routes redirect unauth users to /login, therapist profile shows Anushka Prabhu, and a consultation dialog submission successfully persisted to /api/therapist/requests (verified via API). One behavioural regression found: signing out from either portal lands on /login instead of Home (spec: 'returns to Home').",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Portal sign-out",
+        "issue": "Signing out from either the therapist or client portal lands on /login instead of Home ('/'). Root cause: PortalShell.doSignOut calls `await logout(); navigate('/')`, but because PortalShell renders inside <ProtectedRoute>, the moment logout() flips user to false ProtectedRoute synchronously returns <Navigate to='/login' replace />, which wins over the queued navigate('/'). Spec explicitly says: 'Sign out from either portal returns to Home'.",
+        "affected_selectors": ["[data-testid='therapist-logout']", "[data-testid='client-logout']"]
+      },
+      {
+        "flow": "Consultation submission UX",
+        "issue": "Submission itself works and persists to /api/therapist/requests (verified via authenticated GET — TEST User Regression entry is present). However the dialog does not surface any visible success indicator (no thank-you copy inline, no obvious toast text) in the DOM within 2.5s of submit. Worth confirming the sonner toast is still firing after the refactor (Toaster is mounted in App.js but the success path may have been swallowed).",
+        "affected_selectors": ["[role='dialog']"]
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/test_reports/iteration_3.json", "/app/test_reports/iteration_2.json"],
+  "action_items": [
+    "Prevent regressions like the jsconfig.json+tsconfig.json coexistence — either add a preflight check in scripts or remove jsconfig.json permanently (done in this iteration).",
+    "Fix portal sign-out landing: options — (a) call navigate('/') BEFORE await logout(); (b) inside logout() flip user to false only AFTER a route change; (c) ProtectedRoute could honour a transient 'signing-out' flag and redirect to '/' rather than /login. Spec requires landing on Home.",
+    "Verify sonner toast fires for successful consultation submission (BookConsultationDialog / ConsultationDialog). Users currently get no visible confirmation on Home page even though request is saved."
+  ],
+  "critical_code_review_comments": [
+    "CRITICAL boot regression from the refactor: /app/frontend/jsconfig.json and /app/frontend/tsconfig.json coexisted, causing CRA to throw 'Error: You have both a tsconfig.json and a jsconfig.json'. Frontend was FATAL until jsconfig.json was removed. Add this to the refactor checklist for future TS migrations.",
+    "Two AuthContext modules exist — /app/frontend/src/state/AuthContext.tsx (canonical TS) and /app/frontend/src/context/AuthContext.jsx (legacy re-export shim). Login.jsx still imports from the legacy path (@/context/AuthContext). Works via the shim but new code should be migrated to @/state/AuthContext and the shim eventually removed to avoid two sources of truth.",
+    "Same double-source risk on /app/frontend/src/lib/api.js (legacy shim) vs /app/frontend/src/lib/http.ts. Login.jsx still uses @/lib/api. Consolidate once feature migration is complete.",
+    "PortalShell.doSignOut ordering: `await logout(); navigate('/')` is racey against ProtectedRoute's synchronous redirect once user flips to false. Reverse the order or use a location-state flag.",
+    "React Query provider is now mounted but the migrated feature pages still use useState + useEffect — worth flagging as a follow-up so the QueryClient isn't dead weight in the bundle.",
+    "ProtectedRoute uses `user === null` for loading and `user === false` for signed-out — using a discriminated union / enum ('loading' | 'anonymous' | User) would eliminate the sentinel-value footgun that likely underpins the sign-out redirect bug."
+  ],
+  "updated_files": [
+    "/app/frontend/jsconfig.json (DELETED — was blocking CRA boot after refactor to TypeScript)"
+  ],
+  "success_rate": {
+    "backend": "not tested (frontend-only iteration)",
+    "frontend": "96% (26/27 spec checks; only the sign-out landing spec failed; consultation submission passes at API level but UX confirmation could not be observed)"
+  },
+  "test_credentials": "therapist@borrowedblues.com / TherapistPass123!  |  client@borrowedblues.com / ClientPass123!",
+  "seed_data_creation": "One consultation request persisted during testing (name='TEST User Regression', email='test.regression@example.com') — safe to leave or delete; visible in /api/therapist/requests.",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Frontend requires jsconfig.json to remain deleted. All 12 portal nav entries verified rendering. Sign-out lands on /login (regression). Consultation dialog does submit to backend (confirmed via authenticated GET /api/therapist/requests). No non-401 console errors seen on any route. The 401s on /login are the expected pre-login GET /api/auth/me calls.",
+  "detailed_results": {
+    "boot": {"jsconfig_tsconfig_conflict": "FIXED_BY_DELETING_JSCONFIG", "supervisor_frontend": "RUNNING"},
+    "home": {"hero_Begin_With_Clarity": "PASS", "faq_items": 10, "therapy_journey_text": "PASS"},
+    "lazy_public_pages": {"/about-therapy": "PASS", "/meet-your-therapist": "PASS", "/resources": "PASS", "suspense_fallback_stuck": false},
+    "therapist_portal": {
+      "login_redirect": "PASS (/therapist)",
+      "nav_dashboard": "PASS", "nav_clients": "PASS", "nav_calendar": "PASS",
+      "nav_requests": "PASS", "nav_resources": "PASS", "nav_profile": "PASS",
+      "direct_url_/therapist/calendar": "PASS (calendar entry active)",
+      "profile_shows_Anushka_Prabhu": "PASS",
+      "signout_lands_on_home": "FAIL (lands on /login)",
+      "protected_redirect_after_signout": "PASS (/therapist -> /login)"
+    },
+    "client_portal": {
+      "login_redirect": "PASS (/portal)",
+      "nav_dashboard": "PASS", "nav_appointments": "PASS", "nav_journal": "PASS",
+      "nav_homework": "PASS", "nav_resources": "PASS", "nav_profile": "PASS",
+      "direct_url_/portal/journal": "PASS",
+      "signout_lands_on_home": "FAIL (lands on /login) — same root cause as therapist",
+      "protected_redirect_after_signout": "PASS (/portal -> /login)"
+    },
+    "consultation_dialog": {
+      "opens_on_home": "PASS",
+      "api_persist": "PASS (verified via GET /api/therapist/requests — new record 'TEST User Regression' present)",
+      "visible_success_indicator": "NOT_OBSERVED"
+    },
+    "console_errors": {"non_401": 0, "401_on_login_page_expected": true}
+  },
+  "rca_of_the_issue": {
+    "boot_failure": {
+      "root_cause": "The TypeScript refactor added /app/frontend/tsconfig.json but the legacy /app/frontend/jsconfig.json was never removed. react-scripts explicitly throws when both are present.",
+      "fix_applied_by_testing_agent": "Deleted /app/frontend/jsconfig.json. tsconfig.json already defines the same '@/*' alias so no functionality lost.",
+      "verification": "sudo supervisorctl restart frontend -> RUNNING; webpack compiled successfully; app served at REACT_APP_BACKEND_URL."
+    },
+    "signout_lands_on_login": {
+      "root_cause": "PortalShell.doSignOut does `await logout(); navigate('/');`. But PortalShell is rendered inside <ProtectedRoute role='therapist|client'>. logout() sets user to false in AuthContext, causing ProtectedRoute to synchronously render <Navigate to='/login' replace/>, which is applied before the queued navigate('/') from doSignOut. Net effect: users always end up on /login after sign-out, not on Home as the spec requires.",
+      "reproduction": "Login as therapist or client -> click 'Sign out' in sidebar -> observe URL is /login (spec expects /).",
+      "suggested_mitigation": "Reverse the order in PortalShell: `navigate('/', { replace: true }); await logout();` OR change ProtectedRoute to check for a 'just-signed-out' flag in navigation state and forward to '/' in that case."
+    }
+  }
+}
