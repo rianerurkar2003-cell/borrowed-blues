@@ -252,8 +252,11 @@ async def register(payload: RegisterRequest, response: Response):
 @api.post("/auth/login")
 async def login(payload: LoginRequest, request: Request, response: Response):
     email = payload.email.lower().strip()
-    ip = request.client.host if request.client else "unknown"
-    identifier = f"{ip}:{email}"
+    # Honour X-Forwarded-For behind ingress/load-balancer; take first IP.
+    xff = request.headers.get("x-forwarded-for", "")
+    ip = xff.split(",")[0].strip() if xff else (request.client.host if request.client else "unknown")
+    # Key primarily on email so distributed proxies can't shard the counter.
+    identifier = f"email:{email}"
 
     # brute force check
     lock = await db.login_attempts.find_one({"identifier": identifier})
