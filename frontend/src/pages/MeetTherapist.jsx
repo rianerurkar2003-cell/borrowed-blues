@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { api } from "@/lib/api";
 import { WatercolorEucalyptus, WatercolorBird, WatercolorSapling, WatercolorRipple } from "@/components/Watercolor";
+import ConsultationDialog from "@/components/ConsultationDialog";
 import { ArrowRight } from "lucide-react";
 
 const PILLARS_ARTS = [WatercolorBird, WatercolorEucalyptus, WatercolorRipple, WatercolorSapling];
@@ -40,13 +40,15 @@ export default function MeetTherapist() {
               Every therapeutic relationship begins with trust. Here's a little
               about my background, approach, and the values that guide my work.
             </p>
-            <Link
-              to="/about-therapy"
-              data-testid="therapist-cta"
-              className="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-full bg-bb-cream text-bb-forest hover:bg-white transition-colors"
-            >
-              Book your first consultation <ArrowRight size={16} strokeWidth={1.6}/>
-            </Link>
+            <ConsultationDialog>
+              <button
+                type="button"
+                data-testid="therapist-cta"
+                className="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-full bg-bb-cream text-bb-forest hover:bg-white transition-colors"
+              >
+                Book your first consultation <ArrowRight size={16} strokeWidth={1.6}/>
+              </button>
+            </ConsultationDialog>
           </div>
         </div>
       </section>
@@ -133,12 +135,15 @@ export default function MeetTherapist() {
                 A short consultation, no pressure. You can decide how the story
                 unfolds after that.
               </p>
-              <Link
-                to="/login"
-                className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-full bg-bb-forest text-bb-cream hover:bg-bb-forest-2 transition-colors"
-              >
-                Book a consultation
-              </Link>
+              <ConsultationDialog>
+                <button
+                  type="button"
+                  data-testid="therapist-bottom-cta"
+                  className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-full bg-bb-forest text-bb-cream hover:bg-bb-forest-2 transition-colors"
+                >
+                  Book a consultation
+                </button>
+              </ConsultationDialog>
             </div>
           </div>
         </div>

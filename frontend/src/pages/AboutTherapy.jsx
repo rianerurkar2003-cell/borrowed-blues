@@ -1,6 +1,6 @@
-import { Link } from "react-router-dom";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { WatercolorEucalyptus, WatercolorBird, WatercolorRipple, WatercolorSapling, WatercolorPair } from "@/components/Watercolor";
+import ConsultationDialog from "@/components/ConsultationDialog";
 import { ArrowRight, Check, X } from "lucide-react";
 
 const IS_IS_NOT = {
@@ -32,13 +32,15 @@ export default function AboutTherapy() {
               you're curious, uncertain, or simply looking to understand what to
               expect, this guide is here to help you begin with clarity.
             </p>
-            <Link
-              to="/meet-your-therapist"
-              data-testid="about-cta"
-              className="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-full bg-bb-forest text-bb-cream hover:bg-bb-forest-2 transition-colors"
-            >
-              Book a consultation <ArrowRight size={16} strokeWidth={1.6}/>
-            </Link>
+            <ConsultationDialog>
+              <button
+                type="button"
+                data-testid="about-cta"
+                className="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-full bg-bb-forest text-bb-cream hover:bg-bb-forest-2 transition-colors"
+              >
+                Book a consultation <ArrowRight size={16} strokeWidth={1.6}/>
+              </button>
+            </ConsultationDialog>
           </div>
           <div className="relative aspect-square max-w-md ml-auto">
             <WatercolorEucalyptus className="w-full h-full animate-drift" />
@@ -140,12 +142,15 @@ export default function AboutTherapy() {
                 Taking the first step doesn't require having all the answers. It
                 simply begins with a conversation.
               </p>
-              <Link
-                to="/meet-your-therapist"
-                className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-full bg-bb-forest text-bb-cream hover:bg-bb-forest-2 transition-colors"
-              >
-                Book your first consultation
-              </Link>
+              <ConsultationDialog>
+                <button
+                  type="button"
+                  data-testid="about-bottom-cta"
+                  className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-full bg-bb-forest text-bb-cream hover:bg-bb-forest-2 transition-colors"
+                >
+                  Book your first consultation
+                </button>
+              </ConsultationDialog>
             </div>
             <div className="relative min-h-[220px]">
               <WatercolorBird className="w-72 float-right" />

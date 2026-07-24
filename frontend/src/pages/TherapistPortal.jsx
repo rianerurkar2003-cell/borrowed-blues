@@ -23,12 +23,14 @@ function Shell({ children }) {
   return (
     <div className="min-h-screen bg-bb-cream flex" data-testid="therapist-portal">
       <aside className="w-[248px] shrink-0 hidden md:flex flex-col border-r border-bb-moss/60 bg-bb-forest text-bb-cream px-6 py-8">
-        <Link to="/" className="flex items-center gap-3 mb-10">
-          <svg width="30" height="30" viewBox="0 0 40 40"><path d="M6 22 Q20 4 34 22" stroke="#F9F6F0" strokeWidth="2" fill="none"/><path d="M10 24 Q20 12 30 24" stroke="#B7CCD1" strokeWidth="2" fill="none"/></svg>
-          <div className="leading-tight">
-            <p className="font-serif text-[15px]">Borrowed</p>
-            <p className="font-serif italic text-[13px] text-bb-blue-2 -mt-1">Blues</p>
-          </div>
+        <Link to="/" className="flex items-center mb-10">
+          <img
+            src={LOGO_URL}
+            alt="Borrowed Blues"
+            className="h-9 w-auto"
+            style={{ filter: "invert(1)" }}
+            draggable={false}
+          />
         </Link>
         <p className="bb-eyebrow text-bb-cream/70 mb-3">Your practice</p>
         <nav className="flex flex-col gap-1">

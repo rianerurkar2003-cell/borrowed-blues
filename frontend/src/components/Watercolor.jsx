@@ -154,4 +154,4 @@ export function BirdFlock({ className = "" }) {
   );
 }
 
-export const LOGO_URL = "https://customer-assets-cm19k8pv.emergentagent.net/job_5324cc8f-7830-4d4f-b5e3-d39decfbd68c/artifacts/p9pjt9gh_Borrowed%20blues.webp";
+export const LOGO_URL = "https://customer-assets-wrfwihn1.emergentagent.net/job_calm-therapy-app/artifacts/qtk7gq65_Borrowed%20Blues%20BW%20logo.webp";

@@ -647,15 +647,20 @@ async def seed_admin_and_data():
     if not therapist:
         therapist_id = str(uuid.uuid4())
         therapist = {
-            "id": therapist_id, "email": t_email, "name": "Dr. Anaya Verma",
+            "id": therapist_id, "email": t_email, "name": "Anushka Prabhu",
             "role": "therapist",
             "password_hash": hash_password(t_pw),
             "created_at": datetime.now(timezone.utc).isoformat(),
         }
         await db.users.insert_one(therapist)
-    elif not verify_password(t_pw, therapist["password_hash"]):
-        await db.users.update_one({"email": t_email},
-                                   {"$set": {"password_hash": hash_password(t_pw)}})
+    else:
+        updates = {}
+        if not verify_password(t_pw, therapist["password_hash"]):
+            updates["password_hash"] = hash_password(t_pw)
+        if therapist.get("name") != "Anushka Prabhu":
+            updates["name"] = "Anushka Prabhu"
+        if updates:
+            await db.users.update_one({"email": t_email}, {"$set": updates})
 
     # Sample client
     c_email = os.environ["CLIENT_SEED_EMAIL"].lower()
@@ -679,7 +684,7 @@ async def seed_admin_and_data():
         {"slug": "primary"},
         {"$set": {
             "slug": "primary",
-            "name": "Your Therapist",
+            "name": "Anushka Prabhu",
             "title": "Counselling Psychologist",
             "personal_note": (
                 "My decision to start a private practice came from a desire to "

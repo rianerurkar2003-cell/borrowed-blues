@@ -13,16 +13,8 @@ const NAV = [
 
 function Logo({ className = "" }) {
   return (
-    <Link to="/" data-testid="bb-logo" className={`inline-flex items-center gap-3 group ${className}`}>
-      <svg width="34" height="34" viewBox="0 0 40 40" aria-hidden>
-        <path d="M6 22 Q20 4 34 22" stroke="#1C3829" strokeWidth="2" fill="none"/>
-        <path d="M10 24 Q20 12 30 24" stroke="#4A7C78" strokeWidth="2" fill="none"/>
-        <ellipse cx="20" cy="28" rx="10" ry="2.5" fill="#789B9F" opacity="0.6"/>
-      </svg>
-      <span className="leading-tight">
-        <span className="block font-serif text-[17px] text-bb-forest">Borrowed</span>
-        <span className="block font-serif italic text-[15px] text-bb-teal -mt-1">Blues</span>
-      </span>
+    <Link to="/" data-testid="bb-logo" className={`inline-flex items-center ${className}`}>
+      <img src={LOGO_URL} alt="Borrowed Blues" className="h-10 md:h-11 w-auto select-none" draggable={false} />
     </Link>
   );
 }

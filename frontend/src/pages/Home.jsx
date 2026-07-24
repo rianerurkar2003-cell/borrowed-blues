@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { WatercolorEstuary, WatercolorRipple, WatercolorBird, WatercolorSapling, WatercolorPair, WatercolorFlock, WatercolorEucalyptus, BirdFlock } from "@/components/Watercolor";
+import ConsultationDialog from "@/components/ConsultationDialog";
 import { ArrowRight } from "lucide-react";
 
 const PILLARS = [
@@ -53,13 +54,15 @@ export default function Home() {
               tender.
             </p>
             <div className="mt-9 flex flex-wrap gap-3 animate-fade-up">
-              <Link
-                to="/meet-your-therapist"
-                data-testid="hero-cta-consult"
-                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-bb-forest text-bb-cream hover:bg-bb-forest-2 transition-colors"
-              >
-                Book a consultation <ArrowRight size={16} strokeWidth={1.6}/>
-              </Link>
+              <ConsultationDialog>
+                <button
+                  type="button"
+                  data-testid="hero-cta-consult"
+                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-bb-forest text-bb-cream hover:bg-bb-forest-2 transition-colors"
+                >
+                  Book a consultation <ArrowRight size={16} strokeWidth={1.6}/>
+                </button>
+              </ConsultationDialog>
               <Link
                 to="/about-therapy"
                 data-testid="hero-cta-learn"
@@ -198,13 +201,15 @@ export default function Home() {
                 Taking the first step doesn't require having all the answers. It
                 simply begins with a conversation.
               </p>
-              <Link
-                to="/meet-your-therapist"
-                data-testid="cta-book-consult"
-                className="mt-8 inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-bb-cream text-bb-forest hover:bg-white transition-colors"
-              >
-                Book your first consultation <ArrowRight size={16} strokeWidth={1.6}/>
-              </Link>
+              <ConsultationDialog>
+                <button
+                  type="button"
+                  data-testid="cta-book-consult"
+                  className="mt-8 inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-bb-cream text-bb-forest hover:bg-white transition-colors"
+                >
+                  Book your first consultation <ArrowRight size={16} strokeWidth={1.6}/>
+                </button>
+              </ConsultationDialog>
             </div>
           </div>
         </div>
