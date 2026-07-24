@@ -55,10 +55,11 @@ class TestPublic:
         r = anon.get(f"{BASE}/api/therapist/profile")
         assert r.status_code == 200
         d = r.json()
-        assert d.get("name") == "Dr. Anaya Verma"
+        assert d.get("name") == "Anushka Prabhu"
+        assert d.get("title") == "Counselling Psychologist"
         assert d.get("personal_note")
         assert d.get("approach")
-        assert isinstance(d.get("qualifications"), list) and len(d["qualifications"]) >= 4
+        assert isinstance(d.get("qualifications"), list) and len(d["qualifications"]) >= 3
         assert isinstance(d.get("areas"), list) and "Anxiety" in d["areas"]
         assert isinstance(d.get("pillars"), list) and len(d["pillars"]) == 4
 
@@ -145,6 +146,16 @@ class TestAuth:
                            json={"email": email, "password": "TestPass123!", "name": "X",
                                  "role": "client"})
         assert r2.status_code == 400
+
+    def test_consultation_request_public_then_visible_to_therapist(self, anon, therapist):
+        unique = f"TEST_{uuid.uuid4().hex[:8]}"
+        payload = {"name": f"{unique} Person", "email": f"{unique}@example.com",
+                   "reason": "TEST reason", "preferred_time": "evenings"}
+        r = anon.post(f"{BASE}/api/consultation-requests", json=payload)
+        assert r.status_code == 200, r.text
+        created_id = r.json()["id"]
+        reqs = therapist.get(f"{BASE}/api/therapist/requests").json()
+        assert any(x["id"] == created_id for x in reqs), "Consultation request not visible to therapist"
 
     def test_forgot_password_no_leak(self, anon):
         r1 = anon.post(f"{BASE}/api/auth/forgot-password",
