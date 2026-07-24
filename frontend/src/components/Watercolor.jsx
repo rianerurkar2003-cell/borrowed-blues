@@ -44,10 +44,10 @@ const Img = ({ src, alt, className = "", position = "center", contain = true, st
 );
 
 /** Hero landscape — full-bleed background for home hero + login side panel. */
-export function WatercolorEstuary({ className = "" }) {
+export function WatercolorEstuary({ className = "", position = "center 22%" }) {
   return (
     <div className={`relative overflow-hidden ${className}`}>
-      <Img src={ASSET.estuary} alt="A watercolor estuary edged by wildflowers with birds in the distance." contain={false} position="center 40%" />
+      <Img src={ASSET.estuary} alt="A watercolor estuary edged by wildflowers with birds in the distance." contain={false} position={position} />
     </div>
   );
 }
