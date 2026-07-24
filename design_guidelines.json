@@ -1,0 +1,143 @@
+{
+  "brand_identity": {
+    "name": "Borrowed Blues",
+    "personality": ["gentle", "editorial", "human", "hopeful", "calm", "nature-inspired", "reflective", "minimal"],
+    "anti_patterns": ["clinical", "corporate", "hospital-like", "technology-first", "cold", "overly decorative"],
+    "aesthetic_goal": "A beautifully designed editorial publication rather than a software dashboard. It should reduce uncertainty around beginning therapy and support the therapeutic relationship between sessions."
+  },
+  "typography": {
+    "headings": {
+      "primary_family": "'New Spirit', 'Playfair Display', 'Cormorant Garamond', serif",
+      "google_font_import": "@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Manrope:wght@300;400;500;600;700&display=swap');",
+      "usage": "Use Playfair Display or Cormorant if New Spirit is unavailable. Keep letter-spacing tight for large headers, and normal for subheaders.",
+      "weights": ["400", "500", "600"],
+      "styles": ["normal", "italic (for emphasis and soft tone)"]
+    },
+    "body": {
+      "primary_family": "'Manrope', sans-serif",
+      "usage": "Clean, highly legible geometric sans for all body text, dashboard data, and UI elements. High readability, friendly but structured.",
+      "weights": ["300", "400", "500", "600"],
+      "line_height": "leading-relaxed to leading-loose (1.6 - 1.8) for slow visual rhythm."
+    }
+  },
+  "colors": {
+    "primary": {
+      "deep_forest_green": "#1C3829",
+      "usage": "Primary brand color, text color for high contrast, main CTAs, footer backgrounds, portrait section backgrounds."
+    },
+    "secondary": {
+      "muted_teal": "#4A7C78",
+      "dusty_blue": "#789B9F",
+      "usage": "Accents, secondary buttons, active states, progress indicators, FAQ accordion highlights."
+    },
+    "surface": {
+      "cream": "#F9F6F0",
+      "warm_white": "#FFFCF9",
+      "soft_sage": "#D8E2D8",
+      "light_moss": "#E5EBE5",
+      "usage": "Cream is the primary background (never pure white to avoid a clinical feel). Warm white for cards and overlapping containers. Soft sage and light moss for section backgrounds, borders, dividers, and disabled states."
+    },
+    "rules": [
+      "No pure black (#000000) or pure white (#FFFFFF).",
+      "Avoid saturated colors.",
+      "Avoid bright gradients. If a gradient is needed, use a very subtle linear blend of Cream and Soft Sage."
+    ]
+  },
+  "layouts_and_spacing": {
+    "philosophy": "Large amounts of white space, slow visual rhythm, minimal interface chrome, natural spacing.",
+    "spacing_scale": "Use generous padding. p-8, p-12, p-16, p-24.",
+    "border_radius": "Subtle rounded corners. Use rounded-xl or rounded-2xl for cards, rounded-full for pills and main buttons.",
+    "shadows": "Very soft, diffused shadows. shadow-[0_8px_30px_rgb(0,0,0,0.04)] for cards to create slight elevation without looking like a typical SaaS app.",
+    "interface_chrome": "Avoid heavy borders, rigid data tables, or boxed-in layouts. Use negative space to separate elements rather than lines.",
+    "page_structures": {
+      "marketing": "Fluid, asymmetrical where possible, staggered images, overlapping text and watercolor illustrations.",
+      "dashboard": "More structured but still utilizing cardless UI patterns or very subtle warm white cards on a cream background. Avoid the 'admin panel' look. Keep sidebars soft and integrated."
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "Deep forest green background, cream text, rounded-full, gentle hover state (slight opacity drop or elevation).",
+      "secondary": "Transparent background, deep forest green 1px border, deep forest green text, rounded-full.",
+      "tertiary": "Text-only with a subtle underline or a muted teal color, accompanied by a soft arrow icon."
+    },
+    "cards": {
+      "style": "Warm white background, no border or very subtle light moss border, soft shadow. For dashboard cards (Upcoming Session, Journal), keep padding generous (p-8).",
+      "pillars": "On the home page, the 4-pillar cards (Understanding, Guidance, Progress, Continuity) should use soft sage or cream backgrounds with watercolor accents."
+    },
+    "accordions": {
+      "usage": "For FAQs and Therapy Is/Isn't.",
+      "style": "Muted teal or deep forest green text, clean horizontal light moss dividers, soft and smooth expand/collapse animations."
+    },
+    "forms_and_inputs": {
+      "style": "Cream or warm white backgrounds, light moss borders, rounded-lg. No harsh focus rings (use muted teal ring with low opacity).",
+      "login_panel": "Split screen layout: Left panel features a calming watercolor estuary illustration. Right panel is a clean, minimal form (email/password/remember me) with generous spacing."
+    },
+    "navigation": {
+      "style": "Transparent or translucent Cream background with backdrop blur. Deep forest green text. Minimalist layout. CTA button for 'Client Login'."
+    }
+  },
+  "motion": {
+    "philosophy": "Subtle, calm, reassuring.",
+    "transitions": "Soft fades (duration 300-500ms), gentle hover transitions (bg-opacity, slight transform -translate-y-0.5), slight elevation on hover.",
+    "animations": "Accordion expansions should be fluid. Avoid dramatic motion, springy bounces, or fast snap animations. Elements should fade in gracefully on scroll."
+  },
+  "media": {
+    "illustration_guidance": "Hand-painted watercolor (birds, water, ripples, estuaries, eucalyptus, saplings, botanical elements). Illustrations should become progressively quieter through the experience (e.g., prominent on the Home Hero, subtle and minimal on the Dashboard).",
+    "image_urls": {
+      "home_hero_estuary": {
+        "url": "https://images.unsplash.com/photo-1705599773422-c1066356f801?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MTJ8MHwxfHNlYXJjaHwxfHx3YXRlcmNvbG9yJTIwbGFuZHNjYXBlJTIwcGFpbnRpbmd8ZW58MHx8fHwxNzg0ODgwMjE5fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Watercolor landscape/estuary with subtle hills. Use as a soft background or feature image for the Home Hero and Login side panel."
+      },
+      "watercolor_birds": {
+        "url": "https://images.unsplash.com/photo-1582201957428-5ff47ff7605c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTJ8MHwxfHNlYXJjaHwxfHx3YXRlcmNvbG9yJTIwYmlyZHMlMjBmbHlpbmd8ZW58MHx8fHwxNzg0ODgwMjI4fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Watercolor birds. Use as decorative floating elements in the 'Understanding Therapy' section or Home pillars."
+      },
+      "eucalyptus_botanical": {
+        "url": "https://images.pexels.com/photos/5797937/pexels-photo-5797937.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Minimal eucalyptus branch. Use in the 'Your Therapy Journey' section, Resources, or Journaling areas of the dashboard."
+      },
+      "therapist_portrait": {
+        "url": "https://images.unsplash.com/photo-1733685373178-b49c3943ccef?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODd8MHwxfHNlYXJjaHw0fHx3YXJtJTIwdGhlcmFwaXN0JTIwcG9ydHJhaXQlMjBzbWlsaW5nfGVufDB8fHx8MTc4NDg4MDIxOXww&ixlib=rb-4.1.0&q=85",
+        "description": "Warm, natural portrait of a smiling woman. Use in the 'Meet Your Therapist' section on a deep forest green background."
+      },
+      "soft_texture_background": {
+        "url": "https://images.unsplash.com/photo-1601662528567-526cd06f6582?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzB8MHwxfHNlYXJjaHwxfHxzb2Z0JTIwYWJzdHJhY3QlMjB3YXRlcmNvbG9yJTIwdGV4dHVyZXxlbnwwfHx8fDE3ODQ4ODAyMTl8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Soft textured white/cream paper background. Use as a subtle texture overlay or background for specific content blocks to give a tactile, editorial feel."
+      }
+    }
+  },
+  "iconography": {
+    "library": "lucide-react",
+    "style": "Use thin, elegant stroke weights (strokeWidth={1.5}). Avoid filled or heavy icons. Use icons sparingly to maintain the editorial look."
+  },
+  "accessibility": {
+    "contrast": "Ensure Deep Forest Green text on Cream/Sage backgrounds meets WCAG AAA standards. Use Muted Teal for active interactive elements.",
+    "focus_states": "Visible but soft focus rings on inputs and interactive elements.",
+    "screen_readers": "All illustrative images should have appropriate alt text describing the calm, natural elements."
+  },
+  "instructions_to_main_agent": [
+    "You are building a hybrid web app with both public marketing pages and authenticated dashboards (Client & Therapist).",
+    "Create a clean, multi-page layout structure using React Router (Home, About, Meet Therapist, Resources, Login, Client Dashboard, Therapist Dashboard).",
+    "DO NOT use standard SaaS dashboard templates (no heavy sidebars with harsh lines, no dense data tables unless absolutely necessary). The dashboard must feel supportive, reflective, and like an extension of the marketing site.",
+    "Implement the typography correctly: Use Playfair Display for headings if New Spirit isn't available, and Manrope for body text. Headings should feel elegant, like a high-end magazine.",
+    "Implement a seamless visual journey: Marketing pages should have larger, more evocative watercolor images. As the user enters the dashboard, the illustrations should become smaller, quieter, and placed intentionally (e.g., a small eucalyptus branch near a reflection journal).",
+    "On the Home page, implement the 'Therapy Journey' (Learn -> Book -> Session -> Reflect -> Growth) as an illustrated node or timeline sequence using the provided imagery.",
+    "For the Client Dashboard, include sections for 'Upcoming Session', 'Session Summary', 'Reflection Journal', 'Homework', and an 'Inspirational Sidebar'. Use soft white cards on a cream background.",
+    "For the Therapist Dashboard, include 'Today's Schedule', 'Consultation Requests', 'Recent Reflections', and 'Quick Actions'. Keep it clean and functional but maintain the editorial typography.",
+    "Avoid using the Shadcn 'Card' wrapper if it enforces harsh borders. Customize Shadcn primitives heavily to remove borders, soften shadows, and match the 'Borrowed Blues' theme.",
+    "Inject the images from the media.image_urls object specifically where instructed."
+  ],
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "Create depth through layered design elements with subtle z-index hierarchy and soft shadows.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Do not use dark colors as gradients.",
+    "NEVER use generic placeholder image URLs (like via.placeholder.com). Use the provided Unsplash/Pexels URLs in the design guidelines.",
+    "NEVER use AI assistant emoji characters (🤖🧠💭💡) for icons.",
+    "Every interaction needs micro-animations - soft hover states and smooth transition effects.",
+    "DO NOT apply universal transitions (e.g., transition: all). Target specific properties to avoid breaking transforms.",
+    "DO NOT center align the app container (.App { text-align: center; }). Keep text left-aligned for natural reading rhythm, unless specifically styling a hero headline.",
+    "DO NOT use a fully transparent background for sticky headers or dropdowns to prevent overlapping text legibility issues. Use glassmorphism or a solid cream background.",
+    "All interactive and key informational elements MUST include a `data-testid` attribute for testing.",
+    "Use 'sonner' for toast notifications, customized with the brand's soft, rounded, and elegant style."
+  ]
+}
