@@ -7,12 +7,12 @@ import { toast } from "sonner";
 import { LogOut, CalendarDays, BookHeart, ClipboardList, Sparkles, User, Home as HomeIcon, LibraryBig } from "lucide-react";
 
 const NAV = [
-  { to: "",              label: "Dashboard",   icon: HomeIcon },
-  { to: "appointments",  label: "Appointments", icon: CalendarDays },
-  { to: "journal",       label: "Journal",      icon: BookHeart },
-  { to: "homework",      label: "Homework",     icon: ClipboardList },
-  { to: "resources",     label: "Resources",    icon: LibraryBig },
-  { to: "profile",       label: "Profile",      icon: User },
+  { to: "/portal",              label: "Dashboard",    icon: HomeIcon, end: true },
+  { to: "/portal/appointments", label: "Appointments", icon: CalendarDays },
+  { to: "/portal/journal",      label: "Journal",      icon: BookHeart },
+  { to: "/portal/homework",     label: "Homework",     icon: ClipboardList },
+  { to: "/portal/resources",    label: "Resources",    icon: LibraryBig },
+  { to: "/portal/profile",      label: "Profile",      icon: User },
 ];
 
 function Shell({ children }) {
@@ -28,11 +28,11 @@ function Shell({ children }) {
         </Link>
         <p className="bb-eyebrow mb-3">Your portal</p>
         <nav className="flex flex-col gap-1">
-          {NAV.map(({ to, label, icon: Icon }) => (
+          {NAV.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}
-              end={to === ""}
+              end={!!end}
               data-testid={`client-nav-${label.toLowerCase()}`}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14.5px] transition-colors ${
@@ -66,8 +66,8 @@ function Shell({ children }) {
           <button onClick={async ()=>{ await logout(); nav("/"); }} className="text-sm text-bb-forest/70">Sign out</button>
         </header>
         <div className="md:hidden overflow-x-auto bb-scroll-x border-b border-bb-moss/60 bg-bb-warm px-4 py-2 flex gap-1">
-          {NAV.map(({to,label})=>(
-            <NavLink key={to} to={to} end={to === ""} className={({isActive})=>`px-3 py-2 rounded-full text-xs whitespace-nowrap ${isActive?"bg-bb-forest text-bb-cream":"text-bb-forest/70"}`}>{label}</NavLink>
+          {NAV.map(({to,label,end})=>(
+            <NavLink key={to} to={to} end={!!end} className={({isActive})=>`px-3 py-2 rounded-full text-xs whitespace-nowrap ${isActive?"bg-bb-forest text-bb-cream":"text-bb-forest/70"}`}>{label}</NavLink>
           ))}
         </div>
         <main className="p-6 md:p-10 lg:p-14 max-w-[1180px]">{children}</main>

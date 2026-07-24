@@ -7,12 +7,12 @@ import { WatercolorEucalyptus, WatercolorRipple, BirdFlock, LOGO_URL } from "@/c
 import { LogOut, LayoutDashboard, Users, CalendarDays, ClipboardList, LibraryBig, User as UserIcon, Sparkles } from "lucide-react";
 
 const NAV = [
-  { to: "",             label: "Dashboard",  icon: LayoutDashboard },
-  { to: "clients",      label: "Clients",    icon: Users },
-  { to: "calendar",     label: "Calendar",   icon: CalendarDays },
-  { to: "requests",     label: "Requests",   icon: ClipboardList },
-  { to: "resources",    label: "Resources",  icon: LibraryBig },
-  { to: "profile",      label: "Profile",    icon: UserIcon },
+  { to: "/therapist",           label: "Dashboard",  icon: LayoutDashboard, end: true },
+  { to: "/therapist/clients",   label: "Clients",    icon: Users },
+  { to: "/therapist/calendar",  label: "Calendar",   icon: CalendarDays },
+  { to: "/therapist/requests",  label: "Requests",   icon: ClipboardList },
+  { to: "/therapist/resources", label: "Resources",  icon: LibraryBig },
+  { to: "/therapist/profile",   label: "Profile",    icon: UserIcon },
 ];
 
 function Shell({ children }) {
@@ -34,11 +34,11 @@ function Shell({ children }) {
         </Link>
         <p className="bb-eyebrow text-bb-cream/70 mb-3">Your practice</p>
         <nav className="flex flex-col gap-1">
-          {NAV.map(({ to, label, icon: Icon }) => (
+          {NAV.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}
-              end={to === ""}
+              end={!!end}
               data-testid={`therapist-nav-${label.toLowerCase()}`}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14.5px] transition-colors ${
@@ -70,8 +70,8 @@ function Shell({ children }) {
           <button onClick={async () => { await logout(); nav("/"); }} className="text-sm text-bb-cream/80">Sign out</button>
         </header>
         <div className="md:hidden overflow-x-auto bb-scroll-x border-b border-bb-moss/60 bg-bb-warm px-4 py-2 flex gap-1">
-          {NAV.map(({ to, label }) => (
-            <NavLink key={to} to={to} end={to === ""} className={({ isActive }) => `px-3 py-2 rounded-full text-xs whitespace-nowrap ${isActive ? "bg-bb-forest text-bb-cream" : "text-bb-forest/70"}`}>{label}</NavLink>
+          {NAV.map(({ to, label, end }) => (
+            <NavLink key={to} to={to} end={!!end} className={({ isActive }) => `px-3 py-2 rounded-full text-xs whitespace-nowrap ${isActive ? "bg-bb-forest text-bb-cream" : "text-bb-forest/70"}`}>{label}</NavLink>
           ))}
         </div>
         <main className="p-6 md:p-10 lg:p-14 max-w-[1240px]">{children}</main>
