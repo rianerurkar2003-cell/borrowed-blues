@@ -1,87 +1,66 @@
 # Borrowed Blues — Product Requirements
 
 ## Problem Statement
-Therapy companion platform combining a public marketing site and authenticated portals. Must feel gentle, editorial, human, hopeful, calm, nature-inspired, reflective, minimal — never clinical, corporate, hospital-like, cold, or overly decorative.
+Therapy companion platform combining a public marketing site and authenticated portals. Feels gentle, editorial, human, hopeful, calm, nature-inspired, reflective, minimal — never clinical, corporate, hospital-like, cold, or overly decorative.
 
 ## Personas
-- **Prospective client** — arrives via the public site to understand what therapy is and what to expect
-- **Active client** — logs in to see upcoming session, latest summary, homework, journal, resources
-- **Therapist (Anushka Prabhu)** — logs in to see today's schedule, requests, reflections, and manage clients, notes, homework, resources
+- **Prospective client** — public site to reduce uncertainty around beginning therapy
+- **Active client** — logs in for upcoming session, latest summary, homework, journal, resources
+- **Therapist (Anushka Prabhu)** — logs in for today's schedule, requests, reflections, clients, notes, homework, resources
 
-## Architecture (current)
+## Final architecture
 
 ### Backend (`/app/backend/`)
 ```
-server.py              # thin FastAPI factory: middleware + routers + exception handlers + startup
-config.py              # env vars, fail-fast on missing
-db.py                  # Motor client + create_indexes()
-security.py            # bcrypt + JWT helpers, cookie helpers
-deps.py                # get_current_user + require_role dependency factory
-models.py              # Pydantic input models + clean() helper
-seed.py                # startup seed: therapist + client + profile + samples
-routers/
-  auth.py              # /api/auth/*
-  public.py            # /api/, /therapist/profile, /resources/public, /consultation-requests
-  therapist.py         # /api/therapist/*
-  client.py            # /api/client/*
+server.py              # lifespan (async ctx mgr) + env-driven CORS + routers + exception handlers
+config.py              # fail-fast env vars
+db.py                  # Motor client + 11 indexes
+security.py            # bcrypt + JWT + cookie helpers
+deps.py                # get_current_user + require_role
+models.py              # Pydantic input models + clean()
+seed.py                # idempotent startup seed
+routers/{auth,public,therapist,client}.py
 ```
-Mongo indexes: `users.email` unique, `users.role`, appointment hot-paths on (therapist_id,date) and (client_id,date) and status, session_notes/homework/reflections on (owner_id, created_at desc), resources on (is_public, category), consultation_requests on (status, created_at desc), TTL on password reset tokens.
+Behaviours: httpOnly cookie sessions, JWT access+refresh with silent refresh, bcrypt password hashing, email-scoped 5-attempt lockout, role guards, TTL on password-reset tokens, centralised exception handlers on Starlette/Validation/generic errors.
 
 ### Frontend (`/app/frontend/src/`)
 ```
-App.js                    # BrowserRouter + AuthProvider + QueryClient + ErrorBoundary + Suspense + React.lazy
-lib/
-  types.ts                # domain types (User, Appointment, Homework, ...)
-  http.ts                 # typed axios + 401 auto-refresh + AppError normalisation
-  errors.ts               # AppError class + toAppError()
-  api.js                  # compat shim → lib/http
-services/
-  auth.service.ts
-  therapist.service.ts
-  client.service.ts
-  public.service.ts
-state/
-  AuthContext.tsx         # typed, memoised auth state
-context/AuthContext.jsx   # compat shim → state/AuthContext
+App.js                          # BrowserRouter + AuthProvider + QueryClient + ErrorBoundary + Suspense + React.lazy
+lib/{types,http,errors}.ts      # typed core: domain types, axios+401 refresh interceptor, AppError
+services/{auth,client,therapist,public}.service.ts
+state/AuthContext.tsx           # canonical auth provider
 shared/components/
-  PortalShell.jsx         # single shared portal shell (theme prop)
-  ErrorBoundary.tsx       # brand-styled top-level fallback
-  ProtectedRoute.jsx      # role-based route guard
-components/ProtectedRoute.jsx  # compat shim → shared/components/ProtectedRoute
-components/               # PublicLayout, Watercolor (assets), ConsultationDialog
-features/
-  client/
-    index.jsx             # router
-    nav.js
-    ClientDashboard.jsx, Appointments.jsx, Journal.jsx, Homework.jsx,
-    ClientResources.jsx, ClientProfile.jsx
-  therapist/
-    index.jsx             # router
-    nav.js
-    TherapistDashboard.jsx, Clients.jsx, CalendarView.jsx, Requests.jsx,
-    TherapistResources.jsx, TherapistProfile.jsx
-pages/                    # Home, AboutTherapy, MeetTherapist, Resources, Login
+  PortalShell.jsx               # single shared shell for both portals (theme prop)
+  ProtectedRoute.jsx            # role-based guard
+  ErrorBoundary.tsx             # brand-styled top-level fallback
+components/{PublicLayout, Watercolor, ConsultationDialog}.jsx
+features/client/                # nav.js + index.jsx + 6 sub-pages
+features/therapist/             # nav.js + index.jsx + 6 sub-pages
+pages/{Home, AboutTherapy, MeetTherapist, Resources, Login}.jsx
 ```
+No compat shims. Every file imports from canonical locations.
 
 ## Verification history
-- **Iteration 1**: 20/21 backend pytest + 100% frontend flows on the initial MVP
-- **Iteration 2**: NavLink active-state fix verified 12/12 routes
-- **Iteration 3**: Post-refactor regression pass (large TS/feature-folder move) — sign-out landing regression flagged
-- **Iteration 4**: Sign-out fix + consultation success state verified — 20/20 spec checks
-- **Iteration 5** (this): Backend modular restructure — full regression against monolithic behaviour
+- **Iteration 1** — MVP: 20/21 backend + 100% frontend
+- **Iteration 2** — NavLink active-state fix: 12/12 routes
+- **Iteration 3** — Post-TS/feature-folder refactor: sign-out regression flagged
+- **Iteration 4** — Sign-out fix + consultation success state: 20/20
+- **Iteration 5** — Backend modular restructure: 22/22 backend + 4/4 frontend
+- **Iteration 6** — Final cleanup (lifespan + env CORS + shim removal): validated
 
-## Deferred / Backlog
-- **P1** — Real Google Calendar integration (architected only, MOCKED)
-- **P1** — Adobe Fonts kit for real New Spirit rendering (Fraunces is the fallback)
-- **P1** — Anushka's real portrait for Meet Your Therapist (watercolor placeholder in use)
+## Environment variables (`backend/.env`)
+`MONGO_URL`, `DB_NAME`, `JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `CLIENT_SEED_EMAIL`, `CLIENT_SEED_PASSWORD`, `CORS_ORIGINS`.
+
+**`CORS_ORIGINS`** — `"*"` → open (`allow_origin_regex=".*"`, dev/preview) · comma-separated list → strict allow-list (prod). Example prod value: `"https://borrowedblues.com,https://www.borrowedblues.com"`.
+
+## Deferred / Backlog (all non-blocking, no visual/functional change)
+- **P1** — Real Google Calendar integration (currently MOCKED)
+- **P1** — Adobe Fonts kit for actual New Spirit rendering (Fraunces is the fallback)
+- **P1** — Anushka's real portrait for Meet Your Therapist
 - **P2** — Migrate feature pages from `useState + useEffect` → React Query `useQuery`/`useMutation` (provider already mounted)
-- **P2** — Retire three remaining frontend compat shims (`context/AuthContext.jsx`, `lib/api.js`, `components/ProtectedRoute.jsx`) once the 5 pages still using them are updated to canonical imports
-- **P2** — Convert `ProtectedRoute` sentinel union → discriminated union (`"loading" | "anonymous" | User`)
-- **P2** — Client-side reschedule/cancel appointment; bookmark button on resources; notification badges on portal nav
-- **P3** — Rich text editor + attachments for reflections and session notes
-
-## Environment variables (backend/.env)
-`MONGO_URL`, `DB_NAME`, `JWT_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `CLIENT_SEED_EMAIL`, `CLIENT_SEED_PASSWORD`, `CORS_ORIGINS`. All required (config.py fails fast on missing).
+- **P2** — `ProtectedRoute` sentinel union → discriminated union (`"loading" | "anonymous" | User`)
+- **P2** — Client-side reschedule/cancel appointment; bookmark on resources; notification badges
+- **P3** — Rich text + attachments for reflections and session notes
 
 ## Test credentials
 See `/app/memory/test_credentials.md`.
