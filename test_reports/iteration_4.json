@@ -1,0 +1,54 @@
+{
+  "summary": "Frontend-only iteration_4 focused re-verification of the two regressions flagged in iteration_3 plus a light nav-regression pass. Both fixes verified end-to-end. (1) Portal sign-out from BOTH portals now correctly lands on Home ('/'), with protected-route redirect to /login still working after logout. (2) Consultation dialog now surfaces a visible success state ([data-testid='consultation-success'] with the heading 'Your note is on its way.') within 5s of submit. Full 12-route nav regression (6 therapist + 6 client) still passes with sole active nav and non-empty main content. No non-401 console errors observed. jsconfig.json remains deleted as requested. Refactor is complete.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/test_reports/iteration_4.json",
+    "/app/test_reports/iteration_3.json"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "PortalShell.doSignOut fix is minimal and correct — navigate('/', { replace: true }) is enqueued BEFORE await logout(), so the ProtectedRoute redirect race is now won by the /home push. Nice.",
+    "Consultation success block is now rendered inline in the same DialogContent (data-testid='consultation-success'), which is the correct pattern — no reliance on a toast that may or may not fire. Toast (sonner) still fires in parallel, which is also fine.",
+    "Follow-ups from iteration_3 still standing but non-blocking: two AuthContext modules (state/AuthContext.tsx + context/AuthContext.jsx shim) and two api modules (lib/api.js + lib/http.ts) — consolidate as feature migration proceeds. React Query provider mounted but feature pages still use useState+useEffect — dead-weight until migrated. ProtectedRoute uses sentinel `user === null | false` — consider a discriminated union to prevent future race conditions."
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "not tested (frontend-only iteration per request)",
+    "frontend": "100% (20/20 spec checks — 2 signout-home, 2 protected-redirect-after-signout, 2 consultation success dom+text, 12 nav routes with sole active + content)"
+  },
+  "test_credentials": "therapist@borrowedblues.com / TherapistPass123!  |  client@borrowedblues.com / ClientPass123!",
+  "seed_data_creation": "One consultation persisted for the success-state test (name='TEST Success Check', email='test.success.check@example.com'). Safe to leave — visible in /api/therapist/requests.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "iteration_3 regressions are fully resolved. Do not re-add jsconfig.json — tsconfig.json owns the @/* alias. Sign-out flow: navigate('/', {replace:true}) BEFORE await logout() — do not reorder. Consultation success is inline in the shadcn Dialog, not a toast — assert [data-testid='consultation-success'] within 5s of clicking [data-testid='consult-submit'].",
+  "detailed_results": {
+    "therapist_portal": {
+      "login_redirect": "PASS (/therapist)",
+      "signout_lands_on_home": "PASS (location.pathname === '/')",
+      "protected_redirect_after_signout": "PASS (/therapist -> /login)",
+      "nav_dashboard": "PASS", "nav_clients": "PASS", "nav_calendar": "PASS",
+      "nav_requests": "PASS", "nav_resources": "PASS", "nav_profile": "PASS"
+    },
+    "client_portal": {
+      "login_redirect": "PASS (/portal)",
+      "signout_lands_on_home": "PASS (location.pathname === '/')",
+      "protected_redirect_after_signout": "PASS (/portal -> /login)",
+      "nav_dashboard": "PASS", "nav_appointments": "PASS", "nav_journal": "PASS",
+      "nav_homework": "PASS", "nav_resources": "PASS", "nav_profile": "PASS"
+    },
+    "consultation_dialog": {
+      "opens_on_home": "PASS",
+      "success_testid_visible_within_5s": "PASS ([data-testid='consultation-success'])",
+      "success_text_present": "PASS ('Your note is on its way.')"
+    },
+    "console_errors": {"non_401": 0, "401_on_login_page_expected": true}
+  }
+}

@@ -46,8 +46,11 @@ export default function PortalShell({
   const mobileHeaderText = isDark ? "text-bb-cream/80" : "text-bb-forest/70";
 
   const doSignOut = async () => {
+    // Navigate to Home BEFORE flipping auth state, otherwise <ProtectedRoute>
+    // (which wraps this shell) will synchronously redirect to /login the
+    // moment `user` becomes false, winning the race against navigate('/').
+    navigate("/", { replace: true });
     await logout();
-    navigate("/");
   };
 
   return (
