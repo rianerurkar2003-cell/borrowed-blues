@@ -38,4 +38,7 @@ export const clientService = {
 
   resources: async (): Promise<Resource[]> =>
     (await http.get<Resource[]>("/client/resources")).data,
+
+  resource: async (id: string): Promise<Resource> =>
+    (await http.get<Resource>(`/client/resources/${id}`)).data,
 };

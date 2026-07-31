@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/state/AuthContext";
-import { BirdFlock, LOGO_URL } from "@/components/Watercolor";
+import { BirdFlock } from "@/components/Watercolor";
 import { Menu, X } from "lucide-react";
+import borrowedBluesLogo from "@/assets/borrowed-blues-logo.png";
 
 const NAV = [
   { to: "/",                 label: "Home" },
@@ -14,7 +15,7 @@ const NAV = [
 function Logo({ className = "" }) {
   return (
     <Link to="/" data-testid="bb-logo" className={`inline-flex items-center ${className}`}>
-      <img src={LOGO_URL} alt="Borrowed Blues" className="h-14 md:h-16 w-auto select-none" draggable={false} />
+      <img src={borrowedBluesLogo} alt="Borrowed Blues" className="w-[200px] h-[69px] object-contain select-none" draggable={false} />
     </Link>
   );
 }
@@ -22,14 +23,29 @@ function Logo({ className = "" }) {
 function Header() {
   const { user, logout } = useAuth();
   const nav = useNavigate();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  const hasHeroOverlay = location.pathname === "/" || location.pathname === "/about-therapy";
+  const floating = hasHeroOverlay && !scrolled;
+
+  useEffect(() => {
+    if (!hasHeroOverlay) return undefined;
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [hasHeroOverlay]);
 
   const portalHref = user && user.role === "therapist" ? "/therapist" : "/portal";
 
   return (
     <header
       data-testid="public-header"
-      className="sticky top-0 z-40 backdrop-blur-md bg-bb-cream/85 border-b border-bb-moss/50"
+      className={`sticky top-0 z-40 transition-colors duration-300 ${
+        floating ? "bg-transparent border-transparent" : "bg-white border-b border-bb-moss/50"
+      }`}
     >
       <div className="bb-container flex items-center justify-between h-[92px]">
         <Logo />
@@ -40,7 +56,7 @@ function Header() {
               to={n.to}
               data-testid={`nav-${n.label.toLowerCase().replace(/\s+/g, "-")}`}
               className={({ isActive }) =>
-                `text-[14.5px] tracking-wide transition-colors ${
+                `font-sans text-base font-medium transition-colors ${
                   isActive ? "text-bb-forest" : "text-bb-forest/70 hover:text-bb-forest"
                 }`
               }
@@ -88,7 +104,7 @@ function Header() {
         </button>
       </div>
       {open && (
-        <div className="md:hidden border-t border-bb-moss/60 bg-bb-cream">
+        <div className="md:hidden border-t border-bb-moss/60 bg-white">
           <div className="bb-container py-6 flex flex-col gap-5">
             {NAV.map((n) => (
               <NavLink

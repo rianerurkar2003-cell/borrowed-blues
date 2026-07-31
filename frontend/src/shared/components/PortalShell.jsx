@@ -1,7 +1,7 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "@/state/AuthContext";
-import { LOGO_URL } from "@/components/Watercolor";
 import { LogOut } from "lucide-react";
+import logo from "@/assets/borrowed-blues-logo.png";
 
 /**
  * Shared shell for the Client and Therapist portals. Both portals share the
@@ -58,7 +58,7 @@ export default function PortalShell({
       {/* Desktop sidebar */}
       <aside className={`w-[248px] shrink-0 hidden md:flex flex-col ${asideBorder} ${asideBg} px-6 py-8`}>
         <Link to="/" className="flex items-center mb-10">
-          <img src={LOGO_URL} alt="Borrowed Blues" className="h-11 w-auto" style={logoStyle} draggable={false} />
+          <img src={logo} alt="Borrowed Blues" className="w-[200px] h-[69px] object-contain" style={logoStyle} draggable={false} />
         </Link>
         <p className={`bb-eyebrow ${eyebrowText} mb-3`}>{eyebrowLabel}</p>
         <nav className="flex flex-col gap-1">

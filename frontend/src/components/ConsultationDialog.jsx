@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { http as api } from "@/lib/http";
+import { http } from "@/lib/http";
 import { toAppError } from "@/lib/errors";
 import { toast } from "sonner";
 import { WatercolorPair, WatercolorSapling } from "@/components/Watercolor";
-import { Send, Check, ArrowRight } from "lucide-react";
+import { Check, ArrowRight } from "lucide-react";
+import { publicService } from "@/services/public.service";
 
 /**
  * A gentle public consultation-request form. Renders any `children` as the
@@ -20,6 +21,7 @@ export default function ConsultationDialog({ children, defaultReason = "" }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const [therapistName, setTherapistName] = useState("");
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -27,6 +29,14 @@ export default function ConsultationDialog({ children, defaultReason = "" }) {
     reason: defaultReason,
     preferred_time: "",
   });
+
+  useEffect(() => {
+    publicService.therapistProfile()
+      .then((p) => setTherapistName((p?.name || "").split(" ")[0] || ""))
+      .catch(() => {});
+  }, []);
+
+  const firstName = therapistName || "your therapist";
 
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
@@ -44,7 +54,7 @@ export default function ConsultationDialog({ children, defaultReason = "" }) {
     }
     setBusy(true);
     try {
-      await api.post("/consultation-requests", form);
+      await http.post("/consultation-requests", form);
       setDone(true);
       toast.success("Your note is on its way.");
     } catch (err) {
@@ -72,7 +82,7 @@ export default function ConsultationDialog({ children, defaultReason = "" }) {
             <div>
               <p className="bb-eyebrow">A quiet first step</p>
               <p className="mt-3 font-serif text-xl text-bb-forest leading-snug">
-                Send a short note. Anushka will reply personally.
+                Send a short note. {firstName} will reply personally.
               </p>
             </div>
             <div className="w-32 h-32 opacity-90">
@@ -91,9 +101,9 @@ export default function ConsultationDialog({ children, defaultReason = "" }) {
                     Your note is on its way.
                   </DialogTitle>
                   <DialogDescription className="mt-2 text-bb-forest/70 text-center">
-                    Anushka usually replies within one to two working days. In
-                    the meantime, take your time. There is nothing you need to
-                    do next.
+                    {firstName} usually replies within one to two working
+                    days. In the meantime, take your time. There is nothing
+                    you need to do next.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="mt-8 flex justify-center">
@@ -186,7 +196,7 @@ export default function ConsultationDialog({ children, defaultReason = "" }) {
                 </div>
 
                 <p className="mt-4 text-xs text-bb-forest/55">
-                  Your note is private. It reaches only Anushka.
+                  Your note is private. It reaches only {firstName}.
                 </p>
 
                 <DialogFooter className="mt-6 flex-col sm:flex-row sm:justify-end gap-2">

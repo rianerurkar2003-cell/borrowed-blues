@@ -51,20 +51,3 @@ http.interceptors.response.use(
   },
 );
 
-/** Compat alias for legacy code that imported `api`. Prefer `http` in new code. */
-export const api = http;
-
-/** Legacy helper still used by a few pages. Prefer AppError.message directly. */
-export function formatApiError(detail: unknown): string {
-  if (detail == null) return "Something went wrong. Please try again.";
-  if (typeof detail === "string") return detail;
-  if (Array.isArray(detail)) {
-    return detail
-      .map((e) => (e && typeof (e as { msg?: string }).msg === "string" ? (e as { msg: string }).msg : JSON.stringify(e)))
-      .join(" ");
-  }
-  if (typeof detail === "object" && detail !== null && "msg" in detail) {
-    return String((detail as { msg?: string }).msg ?? "");
-  }
-  return String(detail);
-}

@@ -3,8 +3,10 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/state/AuthContext";
 import { therapistService } from "@/services/therapist.service";
 import { toAppError } from "@/lib/errors";
-import { WatercolorEucalyptus, BirdFlock } from "@/components/Watercolor";
+import { BirdFlock } from "@/components/Watercolor";
 import { toast } from "sonner";
+import blueberriesBb2 from "@/assets/blueberries-bb2.png";
+import StatusBadge from "@/shared/components/StatusBadge";
 
 const EMPTY_DASH = { today: [], upcoming: [], requests: [], reflections: [], client_count: 0 };
 
@@ -12,9 +14,12 @@ export default function TherapistDashboard() {
   const { user } = useAuth();
   const [data, setData] = useState(EMPTY_DASH);
   const [clients, setClients] = useState([]);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
-    therapistService.dashboard().then(setData).catch((e) => toast.error(toAppError(e).message));
-    therapistService.clients().then(setClients).catch((e) => toast.error(toAppError(e).message));
+    Promise.all([
+      therapistService.dashboard().then(setData).catch((e) => toast.error(toAppError(e).message)),
+      therapistService.clients().then(setClients).catch((e) => toast.error(toAppError(e).message)),
+    ]).finally(() => setLoading(false));
   }, []);
   const nameById = Object.fromEntries(clients.map((c) => [c.id, c.name]));
 
@@ -26,11 +31,13 @@ export default function TherapistDashboard() {
       </h1>
       <p className="mt-3 text-bb-forest/70 max-w-xl">{data.today.length} session{data.today.length === 1 ? "" : "s"} today. {data.requests.length} new request{data.requests.length === 1 ? "" : "s"} waiting.</p>
 
+      {loading ? (
+        <p className="mt-10 text-bb-forest/60">Loading your dashboard…</p>
+      ) : (
+      <>
       <div className="mt-10 grid lg:grid-cols-3 gap-6">
         <section className="lg:col-span-2 bg-bb-warm rounded-3xl p-8 shadow-soft relative overflow-hidden" data-testid="today-card">
-          <div className="absolute -right-8 -bottom-8 w-56 opacity-40">
-            <WatercolorEucalyptus className="w-full h-full"/>
-          </div>
+          <img src={blueberriesBb2} alt="" className="absolute right-0 bottom-0 w-[130px] h-[65px] md:w-[300px] md:h-[150px] object-contain object-right opacity-90 pointer-events-none" />
           <p className="bb-eyebrow">Today's schedule</p>
           {data.today.length === 0 ? (
             <p className="mt-4 text-bb-forest/60">Nothing on your calendar today. A rare gift.</p>
@@ -42,7 +49,7 @@ export default function TherapistDashboard() {
                     <p className="font-serif text-xl text-bb-forest">{a.time}</p>
                     <p className="text-sm text-bb-forest/65">{nameById[a.client_id] || "Client"} · {a.mode}</p>
                   </div>
-                  <span className="text-xs px-3 py-1 rounded-full bg-bb-moss/70 text-bb-forest capitalize">{a.status}</span>
+                  <StatusBadge status={a.status} />
                 </li>
               ))}
             </ul>
@@ -50,7 +57,7 @@ export default function TherapistDashboard() {
         </section>
 
         <section className="bg-bb-forest text-bb-cream rounded-3xl p-8 relative overflow-hidden">
-          <p className="bb-eyebrow text-bb-cream/70">Quick actions</p>
+          <p className="bb-eyebrow !text-bb-mist">Quick actions</p>
           <div className="mt-5 grid gap-3">
             <Link to="/therapist/calendar" className="px-5 py-3 rounded-full bg-bb-cream/95 text-bb-forest text-sm text-center">Schedule a session</Link>
             <Link to="/therapist/requests" className="px-5 py-3 rounded-full border border-bb-cream/40 text-bb-cream text-sm text-center">Review requests ({data.requests.length})</Link>
@@ -121,6 +128,8 @@ export default function TherapistDashboard() {
           </ul>
         )}
       </section>
+      </>
+      )}
 
       <BirdFlock className="mt-16 w-40 opacity-60 mx-auto"/>
     </div>

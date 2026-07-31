@@ -12,13 +12,21 @@ export default function Clients() {
   const [notes, setNotes] = useState([]);
   const [noteForm, setNoteForm] = useState(EMPTY_NOTE);
   const [hwForm, setHwForm] = useState(EMPTY_HW);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    therapistService.clients().then((cs) => {
-      setClients(cs);
-      if (cs[0]) setSelected(cs[0]);
-    }).catch((e) => toast.error(toAppError(e).message));
+  const loadClients = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    return therapistService.clients()
+      .then((cs) => {
+        setClients(cs);
+        if (cs[0]) setSelected(cs[0]);
+      })
+      .catch((e) => { const err = toAppError(e); setError(err.message); toast.error(err.message); })
+      .finally(() => setLoading(false));
   }, []);
+  useEffect(() => { loadClients(); }, [loadClients]);
 
   const loadNotes = useCallback((clientId) => {
     therapistService.sessionNotes(clientId).then(setNotes).catch((e) => toast.error(toAppError(e).message));
@@ -53,21 +61,29 @@ export default function Clients() {
 
       <div className="mt-10 grid lg:grid-cols-[280px_1fr] gap-8">
         <aside className="bg-bb-warm rounded-3xl p-4 shadow-soft h-fit" data-testid="client-list">
-          <ul className="divide-y divide-bb-moss/60">
-            {clients.map((c) => (
-              <li key={c.id}>
-                <button
-                  onClick={() => setSelected(c)}
-                  data-testid={`client-item-${c.id}`}
-                  className={`w-full text-left px-3 py-3 rounded-xl ${selected?.id === c.id ? "bg-bb-moss/60 text-bb-forest" : "text-bb-forest/70 hover:bg-bb-moss/30"}`}
-                >
-                  <p className="font-serif text-lg">{c.name}</p>
-                  <p className="text-xs text-bb-forest/55">{c.email}</p>
-                </button>
-              </li>
-            ))}
-            {clients.length === 0 && <p className="text-sm text-bb-forest/60 p-3">No clients yet.</p>}
-          </ul>
+          {loading ? (
+            <p className="text-sm text-bb-forest/60 p-3">Loading your clients…</p>
+          ) : error ? (
+            <p className="text-sm text-bb-forest/60 p-3">Couldn't load clients. <button onClick={loadClients} className="underline hover:text-bb-forest">Try again</button></p>
+          ) : clients.length === 0 ? (
+            <p className="text-sm text-bb-forest/60 p-3">No clients yet.</p>
+          ) : (
+            <ul className="divide-y divide-bb-moss/60">
+              {clients.map((c) => (
+                <li key={c.id}>
+                  <button
+                    onClick={() => setSelected(c)}
+                    data-testid={`client-item-${c.id}`}
+                    aria-pressed={selected?.id === c.id}
+                    className={`w-full text-left px-3 py-3 rounded-xl ${selected?.id === c.id ? "bg-bb-moss/60 text-bb-forest" : "text-bb-forest/70 hover:bg-bb-moss/30"}`}
+                  >
+                    <p className="font-serif text-lg">{c.name}</p>
+                    <p className="text-xs text-bb-forest/55">{c.email}</p>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </aside>
 
         <div>

@@ -20,9 +20,20 @@ DB_NAME        = _required("DB_NAME")
 JWT_SECRET     = _required("JWT_SECRET")
 ADMIN_EMAIL    = _required("ADMIN_EMAIL").lower()
 ADMIN_PASSWORD = _required("ADMIN_PASSWORD")
-CLIENT_SEED_EMAIL    = _required("CLIENT_SEED_EMAIL").lower()
-CLIENT_SEED_PASSWORD = _required("CLIENT_SEED_PASSWORD")
 CORS_ORIGINS   = os.environ.get("CORS_ORIGINS", "*")
+# Auth cookies default to production-safe (Secure + SameSite=None, required for
+# cross-site HTTPS deployments). Set COOKIE_SECURE=false only for local HTTP dev,
+# where SameSite=Lax is used instead (browsers reject SameSite=None without Secure).
+COOKIE_SECURE  = os.environ.get("COOKIE_SECURE", "true").strip().lower() != "false"
+# Dev/demo fixture data (seed.py): the demo client account and its sample
+# appointments/journal/homework/consultation requests. Defaults on for local
+# dev. Set SEED_DEMO_DATA=false in production so a fresh deploy only creates
+# the real therapist account (above) and stays otherwise empty.
+SEED_DEMO_DATA = os.environ.get("SEED_DEMO_DATA", "true").strip().lower() != "false"
+# Only required when SEED_DEMO_DATA is on — production with it disabled
+# doesn't need to invent demo-client credentials just to boot.
+CLIENT_SEED_EMAIL    = _required("CLIENT_SEED_EMAIL").lower() if SEED_DEMO_DATA else ""
+CLIENT_SEED_PASSWORD = _required("CLIENT_SEED_PASSWORD") if SEED_DEMO_DATA else ""
 
 JWT_ALGORITHM   = "HS256"
 ACCESS_TTL      = timedelta(hours=8)

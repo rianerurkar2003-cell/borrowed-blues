@@ -5,9 +5,16 @@ import { toast } from "sonner";
 
 export default function Homework() {
   const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const load = useCallback(() => {
-    clientService.homework().then(setItems).catch((e) => toast.error(toAppError(e).message));
+    setLoading(true);
+    setError(null);
+    return clientService.homework()
+      .then(setItems)
+      .catch((e) => { const err = toAppError(e); setError(err.message); toast.error(err.message); })
+      .finally(() => setLoading(false));
   }, []);
   useEffect(() => { load(); }, [load]);
 
@@ -32,8 +39,14 @@ export default function Homework() {
       <h1 className="mt-3 font-serif text-4xl text-bb-forest">Homework</h1>
       <p className="mt-3 text-bb-forest/70 max-w-xl">Tender practices, not deadlines. Return whenever it feels possible.</p>
 
+      {loading ? (
+        <p className="mt-10 text-bb-forest/60">Loading your homework…</p>
+      ) : error ? (
+        <p className="mt-10 text-bb-forest/60">Couldn't load your homework. <button onClick={load} className="underline hover:text-bb-forest">Try again</button></p>
+      ) : items.length === 0 ? (
+        <p className="mt-10 text-bb-forest/60">No homework yet.</p>
+      ) : (
       <ul className="mt-10 space-y-6" data-testid="homework-list">
-        {items.length === 0 && <p className="text-bb-forest/60">No homework yet.</p>}
         {items.map((h) => (
           <li key={h.id} className={`bg-bb-warm rounded-3xl p-8 shadow-soft ${h.completed ? "opacity-70" : ""}`}>
             <div className="flex items-start justify-between gap-6">
@@ -70,6 +83,7 @@ export default function Homework() {
           </li>
         ))}
       </ul>
+      )}
     </div>
   );
 }

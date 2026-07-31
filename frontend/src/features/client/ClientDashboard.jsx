@@ -3,9 +3,11 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/state/AuthContext";
 import { clientService } from "@/services/client.service";
 import { toAppError } from "@/lib/errors";
-import { WatercolorBird, WatercolorSapling, BirdFlock } from "@/components/Watercolor";
+import { BirdFlock } from "@/components/Watercolor";
 import { Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import upcomingSessionImg from "@/assets/upcoming-session.png";
+import blueberriesBb1 from "@/assets/blueberries-bb1.png";
 
 const QUOTES = [
   "Rest is not a reward. It is a form of care.",
@@ -17,9 +19,13 @@ const QUOTES = [
 export default function ClientDashboard() {
   const { user } = useAuth();
   const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    clientService.dashboard().then(setData).catch((e) => toast.error(toAppError(e).message));
+    clientService.dashboard()
+      .then(setData)
+      .catch((e) => toast.error(toAppError(e).message))
+      .finally(() => setLoading(false));
   }, []);
 
   const quote = QUOTES[new Date().getDate() % QUOTES.length];
@@ -36,11 +42,13 @@ export default function ClientDashboard() {
       </h1>
       <p className="mt-3 text-bb-forest/70 max-w-xl">We saved the small things you left last time. Take your time.</p>
 
+      {loading ? (
+        <p className="mt-10 text-bb-forest/60">Loading your dashboard…</p>
+      ) : (
+      <>
       <div className="mt-10 grid lg:grid-cols-3 gap-6">
         <section className="lg:col-span-2 bg-bb-warm rounded-3xl p-8 shadow-soft relative overflow-hidden" data-testid="upcoming-card">
-          <div className="absolute -right-8 -bottom-8 w-48 opacity-70">
-            <WatercolorSapling className="w-full h-full"/>
-          </div>
+          <img src={upcomingSessionImg} alt="" className="absolute right-0 bottom-0 w-[130px] h-[65px] md:w-[380px] md:h-[190px] object-contain object-right opacity-90 pointer-events-none" />
           <p className="bb-eyebrow">Upcoming session</p>
           {first ? (
             <>
@@ -63,10 +71,8 @@ export default function ClientDashboard() {
         </section>
 
         <section className="bg-bb-forest text-bb-cream rounded-3xl p-8 relative overflow-hidden">
-          <div className="absolute -right-4 -bottom-6 w-32 opacity-70">
-            <WatercolorBird className="w-full h-full"/>
-          </div>
-          <p className="bb-eyebrow text-bb-cream/70">A small note</p>
+          <img src={blueberriesBb1} alt="" className="absolute right-0 bottom-0 w-[100px] h-[50px] md:w-[220px] md:h-[110px] object-contain object-right opacity-90 pointer-events-none" />
+          <p className="bb-eyebrow !text-bb-mist">A small note</p>
           <p className="mt-4 font-serif italic text-2xl leading-snug">"{quote}"</p>
         </section>
       </div>
@@ -127,6 +133,8 @@ export default function ClientDashboard() {
           </ul>
         )}
       </section>
+      </>
+      )}
 
       <BirdFlock className="mt-16 w-40 opacity-60 mx-auto"/>
     </div>

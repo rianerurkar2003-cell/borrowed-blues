@@ -15,12 +15,22 @@ module.exports = {
       colors: {
         // Brand palette
         bb: {
-          forest: "#1C3829",
+          // Core palette — primary buttons, navigation, therapist identity, important actions
+          forest: "#0A3323",
           "forest-2": "#254634",
-          teal: "#4A7C78",
+          // Secondary buttons, information, cards, charts
+          teal: "#105666",
           "teal-2": "#5F918D",
+          // Progress, links, reflection, highlights
+          sky: "#579FD1",
           blue: "#789B9F",
           "blue-2": "#B7CCD1",
+          // Backgrounds, soft cards, empty states
+          mist: "#CAE9FF",
+          // Success, growth, positive feedback
+          leaf: "#9ACD32",
+          // Gentle emphasis, session reminders, encouragement
+          "soft-light": "#E5EBA4",
           sage: "#D8E2D8",
           moss: "#E5EBE5",
           cream: "#F9F6F0",
@@ -78,14 +88,12 @@ module.exports = {
         "accordion-up":   { from: { height: "var(--radix-accordion-content-height)" }, to: { height: "0" } },
         "fade-up":  { "0%": { opacity: "0", transform: "translateY(12px)" }, "100%": { opacity: "1", transform: "translateY(0)" } },
         "fade-in":  { "0%": { opacity: "0" }, "100%": { opacity: "1" } },
-        "drift":    { "0%,100%": { transform: "translateY(0)" }, "50%": { transform: "translateY(-10px)" } },
       },
       animation: {
         "accordion-down": "accordion-down 0.24s ease-out",
         "accordion-up":   "accordion-up 0.24s ease-out",
         "fade-up":        "fade-up 0.9s ease-out both",
         "fade-in":        "fade-in 0.9s ease-out both",
-        "drift":          "drift 9s ease-in-out infinite",
       },
     },
   },

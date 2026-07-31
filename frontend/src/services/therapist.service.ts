@@ -49,6 +49,12 @@ export const therapistService = {
   assignHomework: async (input: HomeworkInput): Promise<Homework> =>
     (await http.post<Homework>("/therapist/homework", input)).data,
 
+  resources: async (): Promise<Resource[]> =>
+    (await http.get<Resource[]>("/therapist/resources")).data,
+
   createResource: async (input: ResourceInput): Promise<Resource> =>
     (await http.post<Resource>("/therapist/resources", input)).data,
+
+  updateResource: async (id: string, patch: Partial<ResourceInput>): Promise<Resource> =>
+    (await http.patch<Resource>(`/therapist/resources/${id}`, patch)).data,
 };

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { therapistService } from "@/services/therapist.service";
 import { toAppError } from "@/lib/errors";
 import { toast } from "sonner";
+import StatusBadge from "@/shared/components/StatusBadge";
 
 const EMPTY_FORM = { client_id: "", date: "", time: "10:00", mode: "online", duration_min: 50 };
 
@@ -9,9 +10,16 @@ export default function CalendarView() {
   const [items, setItems] = useState([]);
   const [clients, setClients] = useState([]);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const load = useCallback(() => {
-    therapistService.appointments().then(setItems).catch((e) => toast.error(toAppError(e).message));
+    setLoading(true);
+    setError(null);
+    return therapistService.appointments()
+      .then(setItems)
+      .catch((e) => { const err = toAppError(e); setError(err.message); toast.error(err.message); })
+      .finally(() => setLoading(false));
   }, []);
   useEffect(() => {
     load();
@@ -44,33 +52,35 @@ export default function CalendarView() {
 
       <div className="mt-10 grid lg:grid-cols-[1.4fr_1fr] gap-8">
         <div className="bg-bb-warm rounded-3xl p-8 shadow-soft" data-testid="calendar-list">
-          <ul className="divide-y divide-bb-moss/60">
-            {items.length === 0 && <p className="text-bb-forest/60">Nothing scheduled yet.</p>}
-            {items.map((a) => (
-              <li key={a.id} className="py-5 flex items-center justify-between gap-4">
-                <div>
-                  <p className="font-serif text-lg text-bb-forest">
-                    {new Date(a.date).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" })} · {a.time}
-                  </p>
-                  <p className="text-sm text-bb-forest/70">{nameById[a.client_id] || "Client"} · {a.mode}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className={`text-xs px-3 py-1 rounded-full capitalize ${
-                    a.status === "completed" ? "bg-bb-moss/70 text-bb-forest" :
-                    a.status === "requested" ? "bg-bb-blue-2 text-bb-forest" :
-                    a.status === "cancelled" ? "bg-[#f2dede] text-[#8a3a1c]" :
-                    "bg-bb-forest text-bb-cream"
-                  }`}>{a.status}</span>
-                  {a.status !== "completed" && (
-                    <button onClick={() => setStatus(a, "completed")} className="text-xs px-3 py-1 rounded-full border border-bb-forest/25 text-bb-forest">Mark done</button>
-                  )}
-                  {a.status !== "cancelled" && (
-                    <button onClick={() => setStatus(a, "cancelled")} className="text-xs px-3 py-1 rounded-full border border-bb-forest/25 text-bb-forest/70">Cancel</button>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
+          {loading ? (
+            <p className="text-bb-forest/60">Loading the calendar…</p>
+          ) : error ? (
+            <p className="text-bb-forest/60">Couldn't load the calendar. <button onClick={load} className="underline hover:text-bb-forest">Try again</button></p>
+          ) : items.length === 0 ? (
+            <p className="text-bb-forest/60">Nothing scheduled yet.</p>
+          ) : (
+            <ul className="divide-y divide-bb-moss/60">
+              {items.map((a) => (
+                <li key={a.id} className="py-5 flex items-center justify-between gap-4">
+                  <div>
+                    <p className="font-serif text-lg text-bb-forest">
+                      {new Date(a.date).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" })} · {a.time}
+                    </p>
+                    <p className="text-sm text-bb-forest/70">{nameById[a.client_id] || "Client"} · {a.mode}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <StatusBadge status={a.status} />
+                    {a.status !== "completed" && (
+                      <button onClick={() => setStatus(a, "completed")} className="text-xs px-3 py-1 rounded-full border border-bb-forest/25 text-bb-forest">Mark done</button>
+                    )}
+                    {a.status !== "cancelled" && (
+                      <button onClick={() => setStatus(a, "cancelled")} className="text-xs px-3 py-1 rounded-full border border-bb-forest/25 text-bb-forest/70">Cancel</button>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <form onSubmit={submit} className="bg-bb-moss/50 rounded-3xl p-8 h-fit" data-testid="calendar-form">

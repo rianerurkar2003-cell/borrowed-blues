@@ -4,7 +4,7 @@ import bcrypt
 import jwt
 from fastapi import Response
 
-from config import JWT_SECRET, JWT_ALGORITHM, ACCESS_TTL, REFRESH_TTL
+from config import JWT_SECRET, JWT_ALGORITHM, ACCESS_TTL, REFRESH_TTL, COOKIE_SECURE
 
 
 def hash_password(pw: str) -> str:
@@ -36,10 +36,11 @@ def decode_token(token: str) -> dict:
 
 
 def set_auth_cookies(response: Response, access: str, refresh: str) -> None:
-    response.set_cookie("access_token", access, httponly=True, secure=True,
-                        samesite="none", max_age=int(ACCESS_TTL.total_seconds()), path="/")
-    response.set_cookie("refresh_token", refresh, httponly=True, secure=True,
-                        samesite="none", max_age=int(REFRESH_TTL.total_seconds()), path="/")
+    samesite = "none" if COOKIE_SECURE else "lax"
+    response.set_cookie("access_token", access, httponly=True, secure=COOKIE_SECURE,
+                        samesite=samesite, max_age=int(ACCESS_TTL.total_seconds()), path="/")
+    response.set_cookie("refresh_token", refresh, httponly=True, secure=COOKIE_SECURE,
+                        samesite=samesite, max_age=int(REFRESH_TTL.total_seconds()), path="/")
 
 
 def clear_auth_cookies(response: Response) -> None:

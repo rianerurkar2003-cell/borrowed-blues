@@ -125,6 +125,11 @@ async def all_reflections(user: dict = Depends(require_role("therapist"))):
     return await db.reflections.find({"is_draft": False}, {"_id": 0}).sort("created_at", -1).to_list(200)
 
 
+@router.get("/resources")
+async def list_resources(user: dict = Depends(require_role("therapist"))):
+    return await db.resources.find({}, {"_id": 0}).sort("created_at", -1).to_list(200)
+
+
 @router.post("/resources")
 async def create_resource(payload: ResourceIn, user: dict = Depends(require_role("therapist"))):
     doc = {
@@ -134,3 +139,15 @@ async def create_resource(payload: ResourceIn, user: dict = Depends(require_role
     }
     await db.resources.insert_one(doc)
     return clean(doc)
+
+
+@router.patch("/resources/{resource_id}")
+async def update_resource(resource_id: str, patch: dict,
+                          user: dict = Depends(require_role("therapist"))):
+    allowed_fields = {"title", "description", "category", "kind", "url", "body", "is_public"}
+    allowed = {k: v for k, v in patch.items() if k in allowed_fields}
+    await db.resources.update_one({"id": resource_id}, {"$set": allowed})
+    doc = await db.resources.find_one({"id": resource_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Resource not found")
+    return doc

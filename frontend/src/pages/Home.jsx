@@ -7,7 +7,9 @@ const PILLARS = [
   { title: "Understanding", body: "Learn what therapy is and how sessions typically feel.", Art: WatercolorFlock },
   { title: "Guidance",      body: "A steady, thoughtful presence — never a script.",        Art: WatercolorBird },
   { title: "Progress",      body: "Recognise growth through reflections and small milestones.", Art: WatercolorSapling },
-  { title: "Continuity",    body: "Stay connected to your therapeutic journey between sessions.", Art: WatercolorRipple },
+  // WatercolorRipple's source image has a hard edge close to its bounds — scale it up
+  // slightly so that edge is cropped outside the visible frame instead of showing as a stroke.
+  { title: "Continuity",    body: "Stay connected to your therapeutic journey between sessions.", Art: WatercolorRipple, artClassName: "scale-125" },
 ];
 
 const JOURNEY = [
@@ -44,40 +46,48 @@ const FAQS = [
 export default function Home() {
   return (
     <>
-      {/* HERO — full-bleed watercolor with centered text */}
-      <section data-testid="home-hero" className="relative">
-        <div className="relative w-full aspect-[16/9] md:aspect-[16/7.5] lg:aspect-[16/6.5] overflow-hidden">
-          <WatercolorEstuary className="absolute inset-0 w-full h-full" position="center 18%" />
-          {/* soft cream fade at the very bottom to blend into next section */}
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-bb-cream pointer-events-none" />
-
-          {/* Centered content */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
-            <h1
-              data-testid="home-hero-title"
-              className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.05] text-bb-forest animate-fade-up"
-              style={{ textShadow: "0 1px 12px rgba(249,246,240,0.55)" }}
-            >
-              Begin With <span className="bb-italic-serif">Clarity</span>
-            </h1>
-            <div className="mt-8 md:mt-10 flex flex-wrap justify-center gap-3 animate-fade-up">
-              <ConsultationDialog>
-                <button
-                  type="button"
-                  data-testid="hero-cta-consult"
-                  className="px-6 py-3 rounded-full bg-bb-teal text-bb-cream text-[15px] shadow-soft hover:bg-bb-teal-2 transition-colors"
-                >
-                  Book a consultation
-                </button>
-              </ConsultationDialog>
-              <Link
-                to="/about-therapy"
-                data-testid="hero-cta-learn"
-                className="px-6 py-3 rounded-full bg-bb-teal/85 text-bb-cream text-[15px] shadow-soft hover:bg-bb-teal transition-colors"
+      {/* HERO — pulled up under the sticky transparent header so the image reads
+          as a true full-bleed background with the nav floating directly on it. */}
+      <section
+        data-testid="home-hero"
+        className="relative overflow-hidden -mt-[92px] w-full aspect-[3/4] sm:aspect-[16/9] md:aspect-[16/7.5] lg:aspect-[1280/873]"
+      >
+        <div className="absolute inset-0">
+          {/* Scaled up just enough, anchored to the top-right corner, to trim only the
+              source image's left edge — which has a small stray watermark-style text
+              mark baked into the file near the top-left — while the top edge itself
+              stays fixed in place so the artwork's open sky is preserved in full.
+              (Horizontal object-position has no effect here: the source's rendered
+              width already matches the container width exactly via object-fit:cover,
+              leaving no horizontal pan room on its own — only this anchored scale can
+              trim the left edge.) */}
+          <WatercolorEstuary className="w-full h-full scale-[1.55] sm:scale-[1.07] origin-top sm:origin-top-right" position="center top" />
+        </div>
+        <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
+          <h1
+            data-testid="home-hero-title"
+            className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.05] text-bb-forest animate-fade-up"
+            style={{ textShadow: "0 1px 12px rgba(249,246,240,0.55)" }}
+          >
+            Begin With <span className="bb-italic-serif">Clarity</span>
+          </h1>
+          <div className="mt-6 md:mt-8 flex flex-wrap justify-center gap-3 animate-fade-up">
+            <ConsultationDialog>
+              <button
+                type="button"
+                data-testid="hero-cta-consult"
+                className="px-6 py-3 rounded-[40px] bg-bb-teal text-bb-cream text-[15px] shadow-soft hover:bg-bb-forest transition-colors"
               >
-                Learn about therapy
-              </Link>
-            </div>
+                Book a consultation
+              </button>
+            </ConsultationDialog>
+            <Link
+              to="/about-therapy"
+              data-testid="hero-cta-learn"
+              className="px-6 py-3 rounded-[40px] bg-bb-teal text-bb-cream text-[15px] shadow-soft hover:bg-bb-forest transition-colors"
+            >
+              Learn about therapy
+            </Link>
           </div>
         </div>
       </section>
@@ -99,20 +109,20 @@ export default function Home() {
       {/* PILLARS — cards laid over a wildflower/estuary field */}
       <section data-testid="home-pillars" className="relative overflow-hidden">
         <div className="absolute inset-0">
-          <WatercolorEstuary className="w-full h-full" />
+          <WatercolorEstuary className="w-full h-full scale-110" />
           <div className="absolute inset-0 bg-bb-forest/25" />
         </div>
         <div className="relative bb-container py-20 md:py-28">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 md:gap-7">
-            {PILLARS.map(({ title, body, Art }, i) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-7">
+            {PILLARS.map(({ title, body, Art, artClassName = "" }, i) => (
               <article
                 key={title}
                 data-testid={`pillar-${title.toLowerCase()}`}
-                className="group bg-bb-warm/85 backdrop-blur-sm rounded-2xl p-4 md:p-5 shadow-card hover:shadow-deep transition-shadow"
+                className="group bg-bb-warm/85 backdrop-blur-sm rounded-2xl p-4 md:p-5 transition-shadow"
                 style={{ animationDelay: `${i * 80}ms` }}
               >
                 <div className="aspect-square rounded-xl overflow-hidden bg-bb-moss/40">
-                  <Art className="w-full h-full" />
+                  <Art className={`w-full h-full ${artClassName}`} />
                 </div>
                 <h3 className="mt-4 font-serif text-xl md:text-2xl text-bb-forest text-center">{title}</h3>
                 <p className="mt-2 text-[13px] md:text-sm text-bb-forest/70 leading-relaxed text-center">{body}</p>
@@ -162,7 +172,7 @@ export default function Home() {
               </g>
             </svg>
 
-            <ol className="relative grid grid-cols-5 gap-2 md:gap-4 items-start">
+            <ol className="relative grid grid-cols-1 md:grid-cols-5 gap-10 md:gap-4 items-start">
               {JOURNEY.map(({ label, Art }, i) => (
                 <li
                   key={label}
@@ -172,7 +182,7 @@ export default function Home() {
                     i % 2 === 1 ? "md:mt-24" : "md:mt-0"
                   }`}
                 >
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full bg-bb-cream/60 backdrop-blur-sm p-2 shadow-soft">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full overflow-hidden bg-bb-cream/60 backdrop-blur-sm shadow-soft [&_img]:object-cover">
                     <Art className="w-full h-full" />
                   </div>
                   <p className="mt-4 font-serif text-lg md:text-xl text-bb-teal">{label}</p>

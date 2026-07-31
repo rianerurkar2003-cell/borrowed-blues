@@ -1,5 +1,3 @@
-import React from "react";
-
 /**
  * Real watercolor assets uploaded by the client. Each exported component
  * accepts a `className` and renders a plain <img>. Component names are
@@ -46,8 +44,8 @@ const Img = ({ src, alt, className = "", position = "center", contain = true, st
 /** Hero landscape — full-bleed background for home hero + login side panel. */
 export function WatercolorEstuary({ className = "", position = "center 22%" }) {
   return (
-    <div className={`relative overflow-hidden ${className}`}>
-      <Img src={ASSET.estuary} alt="A watercolor estuary edged by wildflowers with birds in the distance." contain={false} position={position} />
+    <div className={`relative overflow-hidden ${className}`} aria-hidden="true">
+      <Img src={ASSET.estuary} alt="" contain={false} position={position} />
     </div>
   );
 }
@@ -55,8 +53,8 @@ export function WatercolorEstuary({ className = "", position = "center 22%" }) {
 /** Wide river ribbon — decorative continuity band. */
 export function WatercolorRiver({ className = "" }) {
   return (
-    <div className={`relative overflow-hidden ${className}`}>
-      <Img src={ASSET.river} alt="A watercolor river flowing across the page." />
+    <div className={`relative overflow-hidden ${className}`} aria-hidden="true">
+      <Img src={ASSET.river} alt="" />
     </div>
   );
 }
@@ -64,8 +62,8 @@ export function WatercolorRiver({ className = "" }) {
 /** Two bluebirds beside a rippling pool — used for the 'Reflect' motif. */
 export function WatercolorRipple({ className = "" }) {
   return (
-    <div className={`relative overflow-hidden ${className}`}>
-      <Img src={ASSET.ripple} alt="Two watercolor bluebirds beside a rippling pool of water." />
+    <div className={`relative overflow-hidden ${className}`} aria-hidden="true">
+      <Img src={ASSET.ripple} alt="" />
     </div>
   );
 }
@@ -73,8 +71,8 @@ export function WatercolorRipple({ className = "" }) {
 /** Single bird on a branch — the 'Guidance' motif. */
 export function WatercolorBird({ className = "" }) {
   return (
-    <div className={`relative overflow-hidden ${className}`}>
-      <Img src={ASSET.bird} alt="A small watercolor bluebird resting on a eucalyptus branch." />
+    <div className={`relative overflow-hidden ${className}`} aria-hidden="true">
+      <Img src={ASSET.bird} alt="" />
     </div>
   );
 }
@@ -82,8 +80,8 @@ export function WatercolorBird({ className = "" }) {
 /** Two birds side by side — used for 'Book' / relational moments. */
 export function WatercolorPair({ className = "" }) {
   return (
-    <div className={`relative overflow-hidden ${className}`}>
-      <Img src={ASSET.pair} alt="Two watercolor bluebirds together on a eucalyptus branch." />
+    <div className={`relative overflow-hidden ${className}`} aria-hidden="true">
+      <Img src={ASSET.pair} alt="" />
     </div>
   );
 }
@@ -91,8 +89,8 @@ export function WatercolorPair({ className = "" }) {
 /** Small flock of three flying birds — 'Understanding' / departure motif. */
 export function WatercolorFlock({ className = "" }) {
   return (
-    <div className={`relative overflow-hidden ${className}`}>
-      <Img src={ASSET.flock} alt="Three watercolor bluebirds mid-flight among eucalyptus leaves." />
+    <div className={`relative overflow-hidden ${className}`} aria-hidden="true">
+      <Img src={ASSET.flock} alt="" />
     </div>
   );
 }
@@ -100,8 +98,8 @@ export function WatercolorFlock({ className = "" }) {
 /** Larger bluebirds composition — pillar / editorial cards. */
 export function WatercolorBirdsLarge({ className = "" }) {
   return (
-    <div className={`relative overflow-hidden ${className}`}>
-      <Img src={ASSET.birdsLarge} alt="Three bluebirds among eucalyptus branches." />
+    <div className={`relative overflow-hidden ${className}`} aria-hidden="true">
+      <Img src={ASSET.birdsLarge} alt="" />
     </div>
   );
 }
@@ -109,8 +107,8 @@ export function WatercolorBirdsLarge({ className = "" }) {
 /** Eucalyptus + berries + bird — hero side art. */
 export function WatercolorEucalyptus({ className = "" }) {
   return (
-    <div className={`relative overflow-hidden ${className}`}>
-      <Img src={ASSET.eucalyptus} alt="Watercolor eucalyptus branches with berries and a small blue bird." position="right center" />
+    <div className={`relative overflow-hidden ${className}`} aria-hidden="true">
+      <Img src={ASSET.eucalyptus} alt="" position="right center" />
     </div>
   );
 }
@@ -118,8 +116,8 @@ export function WatercolorEucalyptus({ className = "" }) {
 /** Sapling on soft ground — the 'Progress / Growth' motif. */
 export function WatercolorSapling({ className = "" }) {
   return (
-    <div className={`relative overflow-hidden ${className}`}>
-      <Img src={ASSET.sapling} alt="A watercolor sapling standing on soft ground — a symbol of growth." />
+    <div className={`relative overflow-hidden ${className}`} aria-hidden="true">
+      <Img src={ASSET.sapling} alt="" />
     </div>
   );
 }
@@ -127,8 +125,8 @@ export function WatercolorSapling({ className = "" }) {
 /** Tiny decorative stamp — dashboard accents, footer marks. */
 export function WatercolorStamp({ className = "" }) {
   return (
-    <div className={`relative overflow-hidden ${className}`}>
-      <Img src={ASSET.stamp} alt="A quiet watercolor stamp." />
+    <div className={`relative overflow-hidden ${className}`} aria-hidden="true">
+      <Img src={ASSET.stamp} alt="" />
     </div>
   );
 }
@@ -153,5 +151,3 @@ export function BirdFlock({ className = "" }) {
     </svg>
   );
 }
-
-export const LOGO_URL = "https://customer-assets-wrfwihn1.emergentagent.net/job_calm-therapy-app/artifacts/qtk7gq65_Borrowed%20Blues%20BW%20logo.webp";

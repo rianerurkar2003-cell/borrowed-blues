@@ -2,15 +2,23 @@ import { useCallback, useEffect, useState } from "react";
 import { clientService } from "@/services/client.service";
 import { toAppError } from "@/lib/errors";
 import { toast } from "sonner";
+import StatusBadge from "@/shared/components/StatusBadge";
 
 const EMPTY_FORM = { date: "", time: "10:00", mode: "online", notes: "" };
 
 export default function Appointments() {
   const [items, setItems] = useState([]);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const load = useCallback(() => {
-    clientService.appointments().then(setItems).catch((e) => toast.error(toAppError(e).message));
+    setLoading(true);
+    setError(null);
+    clientService.appointments()
+      .then(setItems)
+      .catch((e) => { const err = toAppError(e); setError(err.message); toast.error(err.message); })
+      .finally(() => setLoading(false));
   }, []);
   useEffect(() => { load(); }, [load]);
 
@@ -32,25 +40,27 @@ export default function Appointments() {
       <div className="mt-10 grid lg:grid-cols-[1.4fr_1fr] gap-8">
         <div className="bg-bb-warm rounded-3xl p-8 shadow-soft" data-testid="appointment-list">
           <p className="bb-eyebrow mb-6">Your calendar</p>
-          {items.length === 0 && <p className="text-bb-forest/60">No sessions yet.</p>}
-          <ul className="divide-y divide-bb-moss/60">
-            {items.map((a) => (
-              <li key={a.id} className="py-5 flex items-center justify-between gap-4">
-                <div>
-                  <p className="font-serif text-xl text-bb-forest">
-                    {new Date(a.date).toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}
-                  </p>
-                  <p className="text-sm text-bb-forest/65">{a.time} · {a.mode} · {a.duration_min} min</p>
-                </div>
-                <span className={`text-xs px-3 py-1 rounded-full capitalize ${
-                  a.status === "completed" ? "bg-bb-moss/70 text-bb-forest" :
-                  a.status === "requested" ? "bg-bb-blue-2 text-bb-forest" :
-                  a.status === "cancelled" ? "bg-[#f2dede] text-[#8a3a1c]" :
-                  "bg-bb-forest text-bb-cream"
-                }`}>{a.status}</span>
-              </li>
-            ))}
-          </ul>
+          {loading ? (
+            <p className="text-bb-forest/60">Loading your sessions…</p>
+          ) : error ? (
+            <p className="text-bb-forest/60">Couldn't load your sessions. <button onClick={load} className="underline hover:text-bb-forest">Try again</button></p>
+          ) : items.length === 0 ? (
+            <p className="text-bb-forest/60">No sessions yet.</p>
+          ) : (
+            <ul className="divide-y divide-bb-moss/60">
+              {items.map((a) => (
+                <li key={a.id} className="py-5 flex items-center justify-between gap-4">
+                  <div>
+                    <p className="font-serif text-xl text-bb-forest">
+                      {new Date(a.date).toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}
+                    </p>
+                    <p className="text-sm text-bb-forest/65">{a.time} · {a.mode} · {a.duration_min} min</p>
+                  </div>
+                  <StatusBadge status={a.status} />
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <form onSubmit={request} className="bg-bb-moss/50 rounded-3xl p-8" data-testid="appointment-request">

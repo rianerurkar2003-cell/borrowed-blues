@@ -95,3 +95,11 @@ async def notes(user: dict = Depends(require_role("client"))):
 @router.get("/resources")
 async def resources(user: dict = Depends(require_role("client"))):
     return await db.resources.find({}, {"_id": 0}).sort("created_at", -1).to_list(200)
+
+
+@router.get("/resources/{resource_id}")
+async def resource_detail(resource_id: str, user: dict = Depends(require_role("client"))):
+    doc = await db.resources.find_one({"id": resource_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Resource not found")
+    return doc

@@ -6,6 +6,7 @@ import Appointments from "@/features/client/Appointments";
 import Journal from "@/features/client/Journal";
 import Homework from "@/features/client/Homework";
 import ClientResources from "@/features/client/ClientResources";
+import ClientResourceDetail from "@/features/client/ClientResourceDetail";
 import ClientProfile from "@/features/client/ClientProfile";
 
 /**
@@ -29,6 +30,7 @@ export default function ClientPortal() {
         <Route path="journal" element={<Journal />} />
         <Route path="homework" element={<Homework />} />
         <Route path="resources" element={<ClientResources />} />
+        <Route path="resources/:id" element={<ClientResourceDetail />} />
         <Route path="profile" element={<ClientProfile />} />
         <Route path="*" element={<Navigate to="" replace />} />
       </Routes>

@@ -4,6 +4,15 @@
 @tailwind components;
 @tailwind utilities;
 
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 @layer base {
   :root {
     --background: 42 40% 97%;      /* cream */
@@ -31,7 +40,14 @@
 
 @layer base {
   * { @apply border-border; }
-  html, body { background: #F9F6F0; }
+  html, body { background: #F9F6F0; scrollbar-gutter: stable; }
+  /* Match the scrollbar track/thumb to the page background so the reserved
+     scrollbar gutter doesn't read as a mismatched grey/white vertical seam
+     against the cream page (visible on non-Mac browsers with inset scrollbars). */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: #F9F6F0; }
+  ::-webkit-scrollbar-thumb { background: #DDD8CE; border-radius: 999px; }
+  html { scrollbar-color: #DDD8CE #F9F6F0; }
   body {
     margin: 0;
     font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;

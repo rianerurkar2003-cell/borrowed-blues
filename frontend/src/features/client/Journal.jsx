@@ -10,9 +10,16 @@ export default function Journal() {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [mood, setMood] = useState("gentle");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const load = useCallback(() => {
-    clientService.reflections().then(setEntries).catch((e) => toast.error(toAppError(e).message));
+    setLoading(true);
+    setError(null);
+    return clientService.reflections()
+      .then(setEntries)
+      .catch((e) => { const err = toAppError(e); setError(err.message); toast.error(err.message); })
+      .finally(() => setLoading(false));
   }, []);
   useEffect(() => { load(); }, [load]);
 
@@ -39,7 +46,7 @@ export default function Journal() {
           <textarea rows={9} value={body} onChange={(e) => setBody(e.target.value)}
             placeholder="Even a sentence is enough."
             data-testid="journal-body"
-            className="mt-4 w-full bg-transparent text-bb-forest/85 outline-none leading-relaxed resize-none"/>
+            className="mt-4 w-full bg-transparent text-bb-forest/85 outline-none leading-relaxed resize-none rounded-lg focus-visible:ring-2 focus-visible:ring-bb-teal/40"/>
           <div className="mt-4 flex items-center gap-3">
             <label className="text-sm text-bb-forest/70">Mood</label>
             <select value={mood} onChange={(e) => setMood(e.target.value)}
@@ -55,22 +62,29 @@ export default function Journal() {
 
         <div>
           <p className="bb-eyebrow mb-4">Previous reflections</p>
-          <ul className="space-y-4" data-testid="journal-list">
-            {entries.length === 0 && <p className="text-bb-forest/60">Nothing yet.</p>}
-            {entries.map((r) => (
-              <li key={r.id} className="bg-bb-warm rounded-2xl p-6 shadow-soft">
-                <div className="flex items-center justify-between">
-                  <p className="font-serif text-xl text-bb-forest">{r.title}</p>
-                  <span className="text-xs text-bb-forest/50">{new Date(r.created_at).toLocaleDateString()}</span>
-                </div>
-                <p className="mt-2 text-bb-forest/75 leading-relaxed whitespace-pre-line">{r.body}</p>
-                <div className="mt-3 flex gap-2 text-xs">
-                  <span className="px-2.5 py-1 rounded-full bg-bb-moss/70 text-bb-forest">{r.mood}</span>
-                  {r.is_draft && <span className="px-2.5 py-1 rounded-full bg-bb-blue-2 text-bb-forest">draft</span>}
-                </div>
-              </li>
-            ))}
-          </ul>
+          {loading ? (
+            <p className="text-bb-forest/60">Loading your reflections…</p>
+          ) : error ? (
+            <p className="text-bb-forest/60">Couldn't load your reflections. <button onClick={load} className="underline hover:text-bb-forest">Try again</button></p>
+          ) : entries.length === 0 ? (
+            <p className="text-bb-forest/60">Nothing yet.</p>
+          ) : (
+            <ul className="space-y-4" data-testid="journal-list">
+              {entries.map((r) => (
+                <li key={r.id} className="bg-bb-warm rounded-2xl p-6 shadow-soft">
+                  <div className="flex items-center justify-between">
+                    <p className="font-serif text-xl text-bb-forest">{r.title}</p>
+                    <span className="text-xs text-bb-forest/50">{new Date(r.created_at).toLocaleDateString()}</span>
+                  </div>
+                  <p className="mt-2 text-bb-forest/75 leading-relaxed whitespace-pre-line">{r.body}</p>
+                  <div className="mt-3 flex gap-2 text-xs">
+                    <span className="px-2.5 py-1 rounded-full bg-bb-moss/70 text-bb-forest">{r.mood}</span>
+                    {r.is_draft && <span className="px-2.5 py-1 rounded-full bg-bb-blue-2 text-bb-forest">draft</span>}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </div>
