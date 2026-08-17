@@ -13,7 +13,10 @@ class RegisterRequest(BaseModel):
     email: EmailStr
     password: str
     name: str
-    role: Literal["therapist", "client"] = "client"
+    # Public registration always creates a client account. Therapist accounts
+    # are provisioned only via ADMIN_EMAIL/ADMIN_PASSWORD in seed.py — never
+    # take the role from client input, or anyone could self-register as
+    # "therapist" and read every client's journal entries and session notes.
 
 
 class ForgotPasswordRequest(BaseModel):

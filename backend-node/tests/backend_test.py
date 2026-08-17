@@ -147,6 +147,19 @@ class TestAuth:
                                  "role": "client"})
         assert r2.status_code == 400
 
+    def test_register_ignores_role_escalation(self):
+        # A caller supplying role=therapist must not be able to self-elevate;
+        # public registration always creates a client account.
+        s = requests.Session()
+        email = f"TEST_{uuid.uuid4().hex[:10]}@example.com"
+        r = s.post(f"{BASE}/api/auth/register",
+                   json={"email": email, "password": "TestPass123!", "name": "Escalator",
+                         "role": "therapist"})
+        assert r.status_code == 200, r.text
+        assert r.json()["role"] == "client"
+        me = s.get(f"{BASE}/api/auth/me")
+        assert me.json()["role"] == "client"
+
     def test_consultation_request_public_then_visible_to_therapist(self, anon, therapist):
         unique = f"TEST_{uuid.uuid4().hex[:8]}"
         payload = {"name": f"{unique} Person", "email": f"{unique}@example.com",

@@ -31,3 +31,11 @@ export const REGISTER = {
 export const LOGOUT = {
 	button: 'logout-button',
 };
+
+export const RESET_PASSWORD = {
+	passwordInput: 'reset-password-password-input',
+	passwordConfirmInput: 'reset-password-password-confirm-input',
+	submitButton: 'reset-password-submit-button',
+	error: 'reset-password-error',
+	loginLink: 'reset-password-login-link',
+};

@@ -3,9 +3,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { http } from "@/lib/http";
 import { toAppError } from "@/lib/errors";
 import { toast } from "sonner";
-import { WatercolorPair, WatercolorSapling } from "@/components/Watercolor";
+import { WatercolorSapling } from "@/components/Watercolor";
 import { Check, ArrowRight } from "lucide-react";
 import { publicService } from "@/services/public.service";
+import consultationIllustration from "@/assets/consultation-illustration.png";
 
 /**
  * A gentle public consultation-request form. Renders any `children` as the
@@ -75,19 +76,19 @@ export default function ConsultationDialog({ children, defaultReason = "" }) {
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent
         data-testid="consultation-dialog"
-        className="max-w-2xl bg-bb-cream border border-bb-moss/70 rounded-3xl p-0 overflow-hidden shadow-card"
+        className="max-w-3xl bg-bb-cream border border-bb-moss/70 rounded-3xl p-0 overflow-hidden"
       >
-        <div className="grid md:grid-cols-[220px_1fr]">
-          <aside className="hidden md:flex flex-col justify-between bg-bb-moss/50 p-6">
-            <div>
-              <p className="bb-eyebrow">A quiet first step</p>
-              <p className="mt-3 font-serif text-xl text-bb-forest leading-snug">
-                Send a short note. {firstName} will reply personally.
-              </p>
-            </div>
-            <div className="w-32 h-32 opacity-90">
-              <WatercolorPair className="w-full h-full" />
-            </div>
+        <div className="grid md:grid-cols-[325px_1fr]">
+          <aside className="hidden md:flex flex-col bg-bb-moss/50 p-6">
+            <p className="bb-eyebrow">A quiet first step</p>
+            <p className="mt-3 font-serif text-xl text-bb-forest leading-snug">
+              Send a short note. {firstName} will reply personally.
+            </p>
+            <img
+              src={consultationIllustration}
+              alt=""
+              className="mt-6 w-[277px] h-[534px] object-contain"
+            />
           </aside>
 
           <div className="p-6 md:p-8">

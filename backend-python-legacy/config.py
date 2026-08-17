@@ -35,6 +35,19 @@ SEED_DEMO_DATA = os.environ.get("SEED_DEMO_DATA", "true").strip().lower() != "fa
 CLIENT_SEED_EMAIL    = _required("CLIENT_SEED_EMAIL").lower() if SEED_DEMO_DATA else ""
 CLIENT_SEED_PASSWORD = _required("CLIENT_SEED_PASSWORD") if SEED_DEMO_DATA else ""
 
+# Outbound email (password reset links, etc). Optional: when SMTP_HOST is
+# unset, mail.py falls back to logging the message instead of sending it,
+# so local dev works with zero setup. Set all SMTP_* vars in production or
+# reset links will never reach anyone.
+SMTP_HOST     = os.environ.get("SMTP_HOST", "")
+SMTP_PORT     = int(os.environ.get("SMTP_PORT", "587"))
+SMTP_USER     = os.environ.get("SMTP_USER", "")
+SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
+SMTP_FROM     = os.environ.get("SMTP_FROM", "Borrowed Blues <no-reply@borrowedblues.com>")
+# Used to build links inside emails (e.g. the password reset URL). Falls
+# back to local dev's frontend origin.
+FRONTEND_URL  = os.environ.get("FRONTEND_URL", "http://localhost:3000").rstrip("/")
+
 JWT_ALGORITHM   = "HS256"
 ACCESS_TTL      = timedelta(hours=8)
 REFRESH_TTL     = timedelta(days=30)

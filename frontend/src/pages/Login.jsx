@@ -150,12 +150,6 @@ export default function Login() {
             <p className="text-xs text-bb-soft-light/70 text-center">
               New here? Ask about a first consultation on the <Link to="/meet-your-therapist" className="text-bb-soft-light hover:underline">therapist page</Link>.
             </p>
-
-            <div className="mt-6 rounded-xl bg-bb-forest/40 border border-bb-soft-light/15 p-4 text-xs text-bb-soft-light/80 leading-relaxed">
-              <p className="font-medium text-bb-soft-light mb-1">Try the demo:</p>
-              <p>Therapist — <span className="italic">therapist@borrowedblues.com</span> / TherapistPass123!</p>
-              <p>Client — <span className="italic">client@borrowedblues.com</span> / ClientPass123!</p>
-            </div>
           </form>
           ) : (
           <form onSubmit={sendForgot} className="mt-10 space-y-6" data-testid="forgot-form">
