@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
 const config = require("./config");
+const { runMigrations } = require("./db");
 const { seed } = require("./seed");
 const { ApiError } = require("./lib/ApiError");
 
@@ -54,10 +55,11 @@ app.use((err, req, res, next) => {
 
 async function start() {
   try {
+    await runMigrations();
     await seed();
-    console.log("Startup complete: seed complete.");
+    console.log("Startup complete: schema ensured, seed complete.");
   } catch (err) {
-    console.error("Startup seed failed:", err);
+    console.error("Startup failed:", err);
   }
   app.listen(config.PORT, () => {
     console.log(`Borrowed Blues API (Node) listening on port ${config.PORT}`);
