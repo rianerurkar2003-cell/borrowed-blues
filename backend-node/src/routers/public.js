@@ -21,7 +21,7 @@ router.get(
     const [rows] = await pool.query(
       "SELECT * FROM therapist_profile WHERE slug = 'primary' LIMIT 1",
     );
-    res.json(rows[0] || {});
+    res.json(rows[0] ? withIsoDates(rows[0], ["updated_at"]) : {});
   }),
 );
 
