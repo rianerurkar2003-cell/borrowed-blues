@@ -1,5 +1,6 @@
 // Therapist router: /api/therapist/*
 "use strict";
+const crypto = require("crypto");
 const express = require("express");
 const { pool } = require("../db");
 const { newId } = require("../lib/ids");
@@ -8,8 +9,9 @@ const { clean } = require("../lib/clean");
 const { ApiError } = require("../lib/ApiError");
 const asyncHandler = require("../lib/asyncHandler");
 const { requireRole } = require("../authMiddleware");
+const { hashPassword } = require("../security");
 const { validate } = require("../validation/validate");
-const { AppointmentIn, SessionSummaryIn, HomeworkIn, ResourceIn } = require("../validation/schemas");
+const { AppointmentIn, SessionSummaryIn, HomeworkIn, ResourceIn, CreateClientIn } = require("../validation/schemas");
 
 const router = express.Router();
 router.use(requireRole("therapist"));
@@ -63,6 +65,31 @@ router.get(
       "SELECT * FROM users WHERE role = 'client' LIMIT 500",
     );
     res.json(rows.map((r) => withIsoDates(clean(r))));
+  }),
+);
+
+router.post(
+  "/clients",
+  validate(CreateClientIn),
+  asyncHandler(async (req, res) => {
+    const email = req.body.email.toLowerCase().trim();
+    const [existing] = await pool.query("SELECT id FROM users WHERE email = ?", [email]);
+    if (existing[0]) throw new ApiError(400, "Email already registered");
+
+    // No password given -> generate one, so the therapist can create an
+    // account without having to invent a secure password herself. Only
+    // returned in this one response since it can never be retrieved again.
+    const wasGenerated = !req.body.password;
+    const password = req.body.password || crypto.randomBytes(6).toString("base64url");
+
+    const id = newId();
+    await pool.query(
+      "INSERT INTO users (id, email, password_hash, name, role) VALUES (?, ?, ?, ?, 'client')",
+      [id, email, hashPassword(password), req.body.name],
+    );
+    const [rows] = await pool.query("SELECT * FROM users WHERE id = ?", [id]);
+    const client = withIsoDates(clean(rows[0]));
+    res.json(wasGenerated ? { ...client, generated_password: password } : client);
   }),
 );
 

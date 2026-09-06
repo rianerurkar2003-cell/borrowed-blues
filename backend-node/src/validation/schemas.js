@@ -85,8 +85,17 @@ const ResourceIn = z.object({
   is_public: z.boolean().optional().default(true),
 });
 
+// Therapist-created client accounts. Password is optional — omit it to have
+// the server generate one, which is then returned once (and only once) so
+// the therapist can share it with the client directly.
+const CreateClientIn = z.object({
+  name: z.string(),
+  email,
+  password: z.string().min(8).optional(),
+});
+
 module.exports = {
   LoginRequest, RegisterRequest, ForgotPasswordRequest, ResetPasswordRequest,
   AppointmentIn, ConsultationRequestIn, SessionSummaryIn, ReflectionIn,
-  HomeworkIn, HomeworkStatusIn, ResourceIn,
+  HomeworkIn, HomeworkStatusIn, ResourceIn, CreateClientIn,
 };

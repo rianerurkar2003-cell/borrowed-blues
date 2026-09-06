@@ -2,9 +2,14 @@ import { useCallback, useEffect, useState } from "react";
 import { therapistService } from "@/services/therapist.service";
 import { toAppError } from "@/lib/errors";
 import { toast } from "sonner";
+import { Copy } from "lucide-react";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
 
 const EMPTY_NOTE = { summary: "", homework: "", shared_with_client: true };
 const EMPTY_HW   = { title: "", description: "", type: "writing" };
+const EMPTY_CLIENT = { name: "", email: "", password: "" };
 
 export default function Clients() {
   const [clients, setClients] = useState([]);
@@ -14,6 +19,10 @@ export default function Clients() {
   const [hwForm, setHwForm] = useState(EMPTY_HW);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [addOpen, setAddOpen] = useState(false);
+  const [addForm, setAddForm] = useState(EMPTY_CLIENT);
+  const [addBusy, setAddBusy] = useState(false);
+  const [newCredentials, setNewCredentials] = useState(null);
 
   const loadClients = useCallback(() => {
     setLoading(true);
@@ -27,6 +36,30 @@ export default function Clients() {
       .finally(() => setLoading(false));
   }, []);
   useEffect(() => { loadClients(); }, [loadClients]);
+
+  const addClient = async (e) => {
+    e.preventDefault();
+    if (!addForm.name.trim() || !addForm.email.trim()) return toast.error("Name and email are needed.");
+    setAddBusy(true);
+    try {
+      const created = await therapistService.createClient({
+        name: addForm.name.trim(),
+        email: addForm.email.trim(),
+        password: addForm.password.trim() || undefined,
+      });
+      toast.success(`${created.name}'s account is ready.`);
+      setAddOpen(false);
+      setAddForm(EMPTY_CLIENT);
+      loadClients();
+      if (created.generated_password) {
+        setNewCredentials({ email: created.email, password: created.generated_password });
+      }
+    } catch (err) {
+      toast.error(toAppError(err).message);
+    } finally {
+      setAddBusy(false);
+    }
+  };
 
   const loadNotes = useCallback((clientId) => {
     therapistService.sessionNotes(clientId).then(setNotes).catch((e) => toast.error(toAppError(e).message));
@@ -56,8 +89,19 @@ export default function Clients() {
 
   return (
     <div>
-      <p className="bb-eyebrow">Your people</p>
-      <h1 className="mt-3 font-serif text-4xl text-bb-forest">Clients</h1>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="bb-eyebrow">Your people</p>
+          <h1 className="mt-3 font-serif text-4xl text-bb-forest">Clients</h1>
+        </div>
+        <button
+          onClick={() => setAddOpen(true)}
+          data-testid="add-client-button"
+          className="mt-3 px-5 py-2.5 rounded-full bg-bb-forest text-bb-cream text-sm shrink-0"
+        >
+          + Add client
+        </button>
+      </div>
 
       <div className="mt-10 grid lg:grid-cols-[280px_1fr] gap-8">
         <aside className="bg-bb-warm rounded-3xl p-4 shadow-soft h-fit" data-testid="client-list">
@@ -147,6 +191,83 @@ export default function Clients() {
           ) : <p className="text-bb-forest/60">Select a client.</p>}
         </div>
       </div>
+
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add a client</DialogTitle>
+            <DialogDescription>
+              Creates their portal login. Share the details with them yourself — there's no automatic invite email yet.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={addClient} className="space-y-4" data-testid="add-client-form">
+            <label className="block text-sm">
+              Name
+              <input
+                required
+                value={addForm.name}
+                onChange={(e) => setAddForm({ ...addForm, name: e.target.value })}
+                data-testid="add-client-name"
+                className="mt-1 w-full rounded-xl border border-bb-moss px-4 py-2.5"
+              />
+            </label>
+            <label className="block text-sm">
+              Email
+              <input
+                required
+                type="email"
+                value={addForm.email}
+                onChange={(e) => setAddForm({ ...addForm, email: e.target.value })}
+                data-testid="add-client-email"
+                className="mt-1 w-full rounded-xl border border-bb-moss px-4 py-2.5"
+              />
+            </label>
+            <label className="block text-sm">
+              Password <span className="text-bb-forest/50">(optional — leave blank to generate one)</span>
+              <input
+                type="text"
+                value={addForm.password}
+                onChange={(e) => setAddForm({ ...addForm, password: e.target.value })}
+                data-testid="add-client-password"
+                className="mt-1 w-full rounded-xl border border-bb-moss px-4 py-2.5"
+              />
+            </label>
+            <DialogFooter>
+              <button type="submit" disabled={addBusy} className="px-5 py-2.5 rounded-full bg-bb-forest text-bb-cream text-sm disabled:opacity-60">
+                {addBusy ? "Creating…" : "Create account"}
+              </button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!newCredentials} onOpenChange={(open) => !open && setNewCredentials(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Account created</DialogTitle>
+            <DialogDescription>
+              Share these with your client directly — this password won't be shown again.
+            </DialogDescription>
+          </DialogHeader>
+          {newCredentials && (
+            <div className="rounded-xl bg-bb-warm p-4 space-y-2 text-sm">
+              <p><span className="text-bb-forest/60">Email:</span> {newCredentials.email}</p>
+              <p className="flex items-center gap-2">
+                <span className="text-bb-forest/60">Password:</span>
+                <code className="font-mono">{newCredentials.password}</code>
+                <button
+                  type="button"
+                  onClick={() => { navigator.clipboard.writeText(newCredentials.password); toast.success("Copied."); }}
+                  aria-label="Copy password"
+                  className="text-bb-forest/60 hover:text-bb-forest"
+                >
+                  <Copy size={14} />
+                </button>
+              </p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

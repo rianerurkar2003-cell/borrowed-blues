@@ -21,6 +21,9 @@ export const therapistService = {
   clients: async (): Promise<User[]> =>
     (await http.get<User[]>("/therapist/clients")).data,
 
+  createClient: async (input: { name: string; email: string; password?: string }): Promise<User & { generated_password?: string }> =>
+    (await http.post<User & { generated_password?: string }>("/therapist/clients", input)).data,
+
   appointments: async (): Promise<Appointment[]> =>
     (await http.get<Appointment[]>("/therapist/appointments")).data,
 
