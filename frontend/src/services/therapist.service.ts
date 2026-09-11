@@ -24,6 +24,10 @@ export const therapistService = {
   createClient: async (input: { name: string; email: string; password?: string }): Promise<User & { generated_password?: string }> =>
     (await http.post<User & { generated_password?: string }>("/therapist/clients", input)).data,
 
+  removeClient: async (clientId: string): Promise<void> => {
+    await http.delete(`/therapist/clients/${clientId}`);
+  },
+
   appointments: async (): Promise<Appointment[]> =>
     (await http.get<Appointment[]>("/therapist/appointments")).data,
 

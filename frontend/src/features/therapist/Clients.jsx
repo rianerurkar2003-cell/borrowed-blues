@@ -23,6 +23,8 @@ export default function Clients() {
   const [addForm, setAddForm] = useState(EMPTY_CLIENT);
   const [addBusy, setAddBusy] = useState(false);
   const [newCredentials, setNewCredentials] = useState(null);
+  const [removeTarget, setRemoveTarget] = useState(null);
+  const [removeBusy, setRemoveBusy] = useState(false);
 
   const loadClients = useCallback(() => {
     setLoading(true);
@@ -58,6 +60,22 @@ export default function Clients() {
       toast.error(toAppError(err).message);
     } finally {
       setAddBusy(false);
+    }
+  };
+
+  const removeClient = async () => {
+    if (!removeTarget) return;
+    setRemoveBusy(true);
+    try {
+      await therapistService.removeClient(removeTarget.id);
+      toast.success(`${removeTarget.name}'s account was removed.`);
+      setRemoveTarget(null);
+      if (selected?.id === removeTarget.id) setSelected(null);
+      loadClients();
+    } catch (err) {
+      toast.error(toAppError(err).message);
+    } finally {
+      setRemoveBusy(false);
     }
   };
 
@@ -133,10 +151,19 @@ export default function Clients() {
         <div>
           {selected ? (
             <>
-              <div className="bg-bb-warm rounded-3xl p-8 shadow-soft">
-                <p className="bb-eyebrow">Client</p>
-                <h2 className="mt-2 font-serif text-3xl text-bb-forest">{selected.name}</h2>
-                <p className="text-bb-forest/70">{selected.email}</p>
+              <div className="bg-bb-warm rounded-3xl p-8 shadow-soft flex items-start justify-between gap-4">
+                <div>
+                  <p className="bb-eyebrow">Client</p>
+                  <h2 className="mt-2 font-serif text-3xl text-bb-forest">{selected.name}</h2>
+                  <p className="text-bb-forest/70">{selected.email}</p>
+                </div>
+                <button
+                  onClick={() => setRemoveTarget(selected)}
+                  data-testid="remove-client-button"
+                  className="mt-3 text-sm text-red-700/70 hover:text-red-700 underline shrink-0"
+                >
+                  Remove client
+                </button>
               </div>
 
               <form onSubmit={addNote} className="mt-6 bg-bb-warm rounded-3xl p-8 shadow-soft" data-testid="session-note-form">
@@ -266,6 +293,35 @@ export default function Clients() {
               </p>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!removeTarget} onOpenChange={(open) => !open && setRemoveTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Remove {removeTarget?.name}?</DialogTitle>
+            <DialogDescription>
+              This permanently deletes their account, appointments, session notes, and homework. This can't be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={() => setRemoveTarget(null)}
+              className="px-5 py-2.5 rounded-full border border-bb-moss text-sm"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={removeClient}
+              disabled={removeBusy}
+              data-testid="confirm-remove-client"
+              className="px-5 py-2.5 rounded-full bg-red-700 text-white text-sm disabled:opacity-60"
+            >
+              {removeBusy ? "Removing…" : "Remove client"}
+            </button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
