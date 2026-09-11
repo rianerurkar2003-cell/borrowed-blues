@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { therapistService } from "@/services/therapist.service";
 import { toAppError } from "@/lib/errors";
 import { toast } from "sonner";
@@ -12,6 +13,7 @@ export default function CalendarView() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [googleConnected, setGoogleConnected] = useState(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -24,6 +26,7 @@ export default function CalendarView() {
   useEffect(() => {
     load();
     therapistService.clients().then(setClients).catch((e) => toast.error(toAppError(e).message));
+    therapistService.googleStatus().then((s) => setGoogleConnected(s.connected)).catch(() => setGoogleConnected(false));
   }, [load]);
   const nameById = Object.fromEntries(clients.map((c) => [c.id, c.name]));
 
@@ -107,7 +110,11 @@ export default function CalendarView() {
             </select>
           </label>
           <button className="mt-6 w-full py-3 rounded-full bg-bb-forest text-bb-cream">Schedule</button>
-          <p className="mt-3 text-xs text-bb-forest/60">Google Calendar sync coming soon.</p>
+          <p className="mt-3 text-xs text-bb-forest/60">
+            {googleConnected
+              ? "Synced to your Google Calendar."
+              : <>Connect Google Calendar in your <Link to="/therapist/profile" className="underline">profile</Link> to sync appointments.</>}
+          </p>
         </form>
       </div>
     </div>

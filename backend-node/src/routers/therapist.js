@@ -12,9 +12,98 @@ const { requireRole } = require("../authMiddleware");
 const { hashPassword } = require("../security");
 const { validate } = require("../validation/validate");
 const { AppointmentIn, SessionSummaryIn, HomeworkIn, ResourceIn, CreateClientIn } = require("../validation/schemas");
+const google = require("../lib/googleCalendar");
 
 const router = express.Router();
 router.use(requireRole("therapist"));
+
+// --- Google Calendar sync (fire-and-forget; never blocks the appointment
+// response, and every function below catches its own errors internally) ---
+
+async function getGoogleAccessToken(userId) {
+  const [rows] = await pool.query("SELECT * FROM google_calendar_connections WHERE user_id = ?", [userId]);
+  const conn = rows[0];
+  if (!conn) return null;
+  if (new Date(conn.expires_at).getTime() - Date.now() > 60000) {
+    return google.decryptToken(conn.access_token);
+  }
+  try {
+    const tokens = await google.refreshAccessToken(userId, google.decryptToken(conn.refresh_token));
+    const expiresAt = new Date(Date.now() + tokens.expires_in * 1000);
+    await pool.query(
+      "UPDATE google_calendar_connections SET access_token = ?, expires_at = ? WHERE user_id = ?",
+      [google.encryptToken(tokens.access_token), expiresAt, userId],
+    );
+    return tokens.access_token;
+  } catch (err) {
+    if (err instanceof google.GoogleAuthExpiredError) {
+      await pool.query("DELETE FROM google_calendar_connections WHERE user_id = ?", [userId]);
+      return null;
+    }
+    throw err;
+  }
+}
+
+async function syncAppointmentCreate(appointment) {
+  try {
+    const accessToken = await getGoogleAccessToken(appointment.therapist_id);
+    if (!accessToken) return;
+    const eventId = await google.createEvent(accessToken, appointment);
+    await pool.query(
+      `INSERT INTO google_calendar_events (appointment_id, google_event_id) VALUES (?, ?)
+       ON DUPLICATE KEY UPDATE google_event_id = VALUES(google_event_id)`,
+      [appointment.id, eventId],
+    );
+  } catch (err) {
+    console.error("[google] create event failed:", err.message);
+  }
+}
+
+async function syncAppointmentUpdate(appointment) {
+  try {
+    const accessToken = await getGoogleAccessToken(appointment.therapist_id);
+    if (!accessToken) return;
+    const [rows] = await pool.query(
+      "SELECT google_event_id FROM google_calendar_events WHERE appointment_id = ?",
+      [appointment.id],
+    );
+    if (!rows[0]) return syncAppointmentCreate(appointment);
+    try {
+      await google.updateEvent(accessToken, rows[0].google_event_id, appointment);
+    } catch (err) {
+      // Therapist deleted the event by hand in Google Calendar -> treat as
+      // gone, drop the stale mapping, and recreate it fresh.
+      if (err instanceof google.GoogleEventGoneError) {
+        await pool.query("DELETE FROM google_calendar_events WHERE appointment_id = ?", [appointment.id]);
+        return syncAppointmentCreate(appointment);
+      }
+      throw err;
+    }
+  } catch (err) {
+    console.error("[google] update event failed:", err.message);
+  }
+}
+
+async function syncAppointmentDelete(appointmentId, therapistId) {
+  try {
+    const [rows] = await pool.query(
+      "SELECT google_event_id FROM google_calendar_events WHERE appointment_id = ?",
+      [appointmentId],
+    );
+    if (!rows[0]) return;
+    const accessToken = await getGoogleAccessToken(therapistId);
+    if (accessToken) {
+      try {
+        await google.deleteEvent(accessToken, rows[0].google_event_id);
+      } catch (err) {
+        if (!(err instanceof google.GoogleEventGoneError)) throw err;
+      }
+    }
+    await pool.query("DELETE FROM google_calendar_events WHERE appointment_id = ?", [appointmentId]);
+  } catch (err) {
+    console.error("[google] delete event failed:", err.message);
+  }
+}
 
 const toAppointment = (r) => withIsoDates(r);
 const toReflection = (r) => withIsoDates({ ...r, is_draft: !!r.is_draft });
@@ -137,6 +226,7 @@ router.post(
     );
     const [rows] = await pool.query("SELECT * FROM appointments WHERE id = ?", [id]);
     res.json(toAppointment(rows[0]));
+    syncAppointmentCreate(rows[0]).catch((err) => console.error("[google] unhandled create error:", err));
   }),
 );
 
@@ -160,7 +250,15 @@ router.patch(
       );
     }
     const [rows] = await pool.query("SELECT * FROM appointments WHERE id = ?", [req.params.appointmentId]);
-    res.json(rows[0] ? toAppointment(rows[0]) : null);
+    const appt = rows[0];
+    res.json(appt ? toAppointment(appt) : null);
+    if (appt) {
+      if (appt.status === "cancelled") {
+        syncAppointmentDelete(appt.id, appt.therapist_id).catch((err) => console.error("[google] unhandled delete error:", err));
+      } else if (appt.status !== "completed") {
+        syncAppointmentUpdate(appt).catch((err) => console.error("[google] unhandled update error:", err));
+      }
+    }
   }),
 );
 

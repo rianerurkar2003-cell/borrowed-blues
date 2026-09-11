@@ -14,6 +14,11 @@ export interface User {
   created_at: string;
 }
 
+export interface GoogleCalendarStatus {
+  connected: boolean;
+  connected_email: string | null;
+}
+
 export type AppointmentStatus = "scheduled" | "completed" | "cancelled" | "requested";
 export type AppointmentMode = "online" | "in-person";
 

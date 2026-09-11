@@ -13,6 +13,7 @@ const publicRouter = require("./routers/public");
 const authRouter = require("./routers/auth");
 const therapistRouter = require("./routers/therapist");
 const clientRouter = require("./routers/client");
+const googleCalendarAuthRouter = require("./routers/googleCalendarAuth");
 
 const app = express();
 
@@ -35,6 +36,13 @@ app.use(express.json());
 // ---------- Routers (all under /api) ----------
 app.use("/api", publicRouter);
 app.use("/api/auth", authRouter);
+// Mounted before therapistRouter: therapistRouter applies requireRole to
+// every path under /api/therapist via router.use, which would swallow
+// /google/callback's deliberately-unauthenticated error handling (it must
+// redirect the browser, never answer with a raw JSON 401). Registering
+// this more specific prefix first lets it fully handle its own routes
+// (including auth) before falling through to therapistRouter.
+app.use("/api/therapist/google", googleCalendarAuthRouter);
 app.use("/api/therapist", therapistRouter);
 app.use("/api/client", clientRouter);
 

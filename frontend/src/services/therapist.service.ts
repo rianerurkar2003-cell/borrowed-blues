@@ -3,6 +3,7 @@ import type {
   Appointment,
   AppointmentInput,
   ConsultationRequest,
+  GoogleCalendarStatus,
   Homework,
   HomeworkInput,
   Reflection,
@@ -26,6 +27,16 @@ export const therapistService = {
 
   removeClient: async (clientId: string): Promise<void> => {
     await http.delete(`/therapist/clients/${clientId}`);
+  },
+
+  googleStatus: async (): Promise<GoogleCalendarStatus> =>
+    (await http.get<GoogleCalendarStatus>("/therapist/google/status")).data,
+
+  googleAuthUrl: async (): Promise<string> =>
+    (await http.get<{ url: string }>("/therapist/google/auth-url")).data.url,
+
+  googleDisconnect: async (): Promise<void> => {
+    await http.post("/therapist/google/disconnect");
   },
 
   appointments: async (): Promise<Appointment[]> =>

@@ -43,6 +43,19 @@ const SMTP_PASSWORD = process.env.SMTP_PASSWORD || "";
 const SMTP_FROM = process.env.SMTP_FROM || "Borrowed Blues <no-reply@borrowedblues.com>";
 const FRONTEND_URL = (process.env.FRONTEND_URL || "http://localhost:3000").replace(/\/+$/, "");
 
+// Google Calendar sync (optional): when GOOGLE_CLIENT_ID is unset, the
+// /therapist/google/* routes just report "not connected" instead of failing
+// to boot. GOOGLE_TOKEN_ENCRYPTION_KEY encrypts stored OAuth tokens at rest;
+// left unset, tokens are stored in plain text (a startup warning is logged).
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "";
+const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || "";
+const GOOGLE_CALENDAR_TIMEZONE = process.env.GOOGLE_CALENDAR_TIMEZONE || "Asia/Kolkata";
+const GOOGLE_TOKEN_ENCRYPTION_KEY = process.env.GOOGLE_TOKEN_ENCRYPTION_KEY || "";
+if (GOOGLE_CLIENT_ID && !GOOGLE_TOKEN_ENCRYPTION_KEY) {
+  console.warn("[config] GOOGLE_TOKEN_ENCRYPTION_KEY not set — Google Calendar OAuth tokens will be stored in plain text.");
+}
+
 const PORT = Number(process.env.PORT || 8001);
 
 const JWT_ALGORITHM = "HS256";
@@ -57,6 +70,8 @@ module.exports = {
   CORS_ORIGINS, COOKIE_SECURE,
   SEED_DEMO_DATA, CLIENT_SEED_EMAIL, CLIENT_SEED_PASSWORD,
   SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM, FRONTEND_URL,
+  GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI,
+  GOOGLE_CALENDAR_TIMEZONE, GOOGLE_TOKEN_ENCRYPTION_KEY,
   PORT,
   JWT_ALGORITHM, ACCESS_TTL_SECONDS, REFRESH_TTL_SECONDS,
   LOCKOUT_ATTEMPTS, LOCKOUT_DURATION_MINUTES,
