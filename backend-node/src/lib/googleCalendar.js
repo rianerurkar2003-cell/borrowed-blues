@@ -149,12 +149,22 @@ async function callCalendarApi(url, options, accessToken) {
 }
 
 async function createEvent(accessToken, appointment) {
-  const event = await callCalendarApi(CALENDAR_EVENTS_URL, {
+  const body = eventBody(appointment);
+  let url = CALENDAR_EVENTS_URL;
+  if (appointment.mode === "online") {
+    // Ask Calendar to mint a Google Meet link for the event. Requires the
+    // conferenceDataVersion query param whenever conferenceData is sent.
+    body.conferenceData = {
+      createRequest: { requestId: appointment.id, conferenceSolutionKey: { type: "hangoutsMeet" } },
+    };
+    url += "?conferenceDataVersion=1";
+  }
+  const event = await callCalendarApi(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(eventBody(appointment)),
+    body: JSON.stringify(body),
   }, accessToken);
-  return event.id;
+  return { eventId: event.id, meetLink: event.hangoutLink || null };
 }
 
 async function updateEvent(accessToken, googleEventId, appointment) {

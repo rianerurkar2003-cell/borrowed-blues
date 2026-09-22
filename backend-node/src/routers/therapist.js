@@ -48,15 +48,17 @@ async function getGoogleAccessToken(userId) {
 async function syncAppointmentCreate(appointment) {
   try {
     const accessToken = await getGoogleAccessToken(appointment.therapist_id);
-    if (!accessToken) return;
-    const eventId = await google.createEvent(accessToken, appointment);
+    if (!accessToken) return null;
+    const { eventId, meetLink } = await google.createEvent(accessToken, appointment);
     await pool.query(
       `INSERT INTO google_calendar_events (appointment_id, google_event_id) VALUES (?, ?)
        ON DUPLICATE KEY UPDATE google_event_id = VALUES(google_event_id)`,
       [appointment.id, eventId],
     );
+    return meetLink;
   } catch (err) {
     console.error("[google] create event failed:", err.message);
+    return null;
   }
 }
 
@@ -114,7 +116,7 @@ function formatAppointmentWhen(date, time) {
   return `${dateStr} at ${time.slice(0, 5)}`;
 }
 
-async function sendAppointmentConfirmationEmail(appointment, therapistName) {
+async function sendAppointmentConfirmationEmail(appointment, therapistName, meetLink) {
   try {
     const [rows] = await pool.query("SELECT email, name FROM users WHERE id = ?", [appointment.client_id]);
     const client = rows[0];
@@ -126,8 +128,10 @@ async function sendAppointmentConfirmationEmail(appointment, therapistName) {
       "Your appointment is confirmed",
       `<p>Hi ${client.name || ""},</p>` +
         `<p>Your appointment with ${therapistName} is confirmed for <strong>${when}</strong> (${appointment.duration_min} min, ${modeLabel}).</p>` +
+        (meetLink ? `<p>Join here: <a href="${meetLink}">${meetLink}</a></p>` : "") +
         `<p>If you need to reschedule, just get in touch.</p>`,
-      `Your appointment with ${therapistName} is confirmed for ${when} (${appointment.duration_min} min, ${modeLabel}).`,
+      `Your appointment with ${therapistName} is confirmed for ${when} (${appointment.duration_min} min, ${modeLabel}).\n` +
+        (meetLink ? `Join here: ${meetLink}\n` : ""),
     );
   } catch (err) {
     console.error("[mail] appointment confirmation email failed:", err.message);
@@ -255,10 +259,15 @@ router.post(
     );
     const [rows] = await pool.query("SELECT * FROM appointments WHERE id = ?", [id]);
     res.json(toAppointment(rows[0]));
-    syncAppointmentCreate(rows[0]).catch((err) => console.error("[google] unhandled create error:", err));
-    sendAppointmentConfirmationEmail(rows[0], req.user.name).catch((err) =>
-      console.error("[mail] unhandled confirmation email error:", err),
-    );
+    // Calendar sync runs first so an online appointment's email can include
+    // the Google Meet link minted for its event.
+    syncAppointmentCreate(rows[0])
+      .catch((err) => {
+        console.error("[google] unhandled create error:", err);
+        return null;
+      })
+      .then((meetLink) => sendAppointmentConfirmationEmail(rows[0], req.user.name, meetLink))
+      .catch((err) => console.error("[mail] unhandled confirmation email error:", err));
   }),
 );
 
