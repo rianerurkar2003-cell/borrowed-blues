@@ -13,6 +13,7 @@ const { hashPassword } = require("../security");
 const { validate } = require("../validation/validate");
 const { AppointmentIn, SessionSummaryIn, HomeworkIn, ResourceIn, CreateClientIn } = require("../validation/schemas");
 const google = require("../lib/googleCalendar");
+const { sendEmail } = require("../mail");
 
 const router = express.Router();
 router.use(requireRole("therapist"));
@@ -102,6 +103,34 @@ async function syncAppointmentDelete(appointmentId, therapistId) {
     await pool.query("DELETE FROM google_calendar_events WHERE appointment_id = ?", [appointmentId]);
   } catch (err) {
     console.error("[google] delete event failed:", err.message);
+  }
+}
+
+function formatAppointmentWhen(date, time) {
+  const [year, month, day] = date.split("-").map(Number);
+  const dateStr = new Date(year, month - 1, day).toLocaleDateString("en-US", {
+    weekday: "long", year: "numeric", month: "long", day: "numeric",
+  });
+  return `${dateStr} at ${time.slice(0, 5)}`;
+}
+
+async function sendAppointmentConfirmationEmail(appointment, therapistName) {
+  try {
+    const [rows] = await pool.query("SELECT email, name FROM users WHERE id = ?", [appointment.client_id]);
+    const client = rows[0];
+    if (!client || !client.email) return;
+    const when = formatAppointmentWhen(appointment.date, appointment.time);
+    const modeLabel = appointment.mode === "in-person" ? "in person" : "online";
+    await sendEmail(
+      client.email,
+      "Your appointment is confirmed",
+      `<p>Hi ${client.name || ""},</p>` +
+        `<p>Your appointment with ${therapistName} is confirmed for <strong>${when}</strong> (${appointment.duration_min} min, ${modeLabel}).</p>` +
+        `<p>If you need to reschedule, just get in touch.</p>`,
+      `Your appointment with ${therapistName} is confirmed for ${when} (${appointment.duration_min} min, ${modeLabel}).`,
+    );
+  } catch (err) {
+    console.error("[mail] appointment confirmation email failed:", err.message);
   }
 }
 
@@ -227,6 +256,9 @@ router.post(
     const [rows] = await pool.query("SELECT * FROM appointments WHERE id = ?", [id]);
     res.json(toAppointment(rows[0]));
     syncAppointmentCreate(rows[0]).catch((err) => console.error("[google] unhandled create error:", err));
+    sendAppointmentConfirmationEmail(rows[0], req.user.name).catch((err) =>
+      console.error("[mail] unhandled confirmation email error:", err),
+    );
   }),
 );
 
