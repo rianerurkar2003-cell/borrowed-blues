@@ -5,6 +5,7 @@ import approachCompassion from "@/assets/approach-compassion.png";
 import approachCollaboration from "@/assets/approach-collaboration.png";
 import approachEvidenceBased from "@/assets/approach-evidence-based.png";
 import approachGrowth from "@/assets/approach-growth.png";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 const QUALIFICATIONS = [
   {
@@ -49,6 +50,7 @@ const APPROACH = [
 ];
 
 export default function MeetTherapist() {
+  useDocumentTitle("Meet Your Therapist | Borrowed Blues");
   return (
     <>
       {/* HERO — full-bleed split screen: photo left, dark forest panel right. */}

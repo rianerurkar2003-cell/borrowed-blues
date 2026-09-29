@@ -9,6 +9,7 @@ import sessionShareImg from "@/assets/session-share.png";
 import sessionReflectImg from "@/assets/session-reflect.png";
 import sessionTalkImg from "@/assets/session-talk.png";
 import sessionGrowImg from "@/assets/session-grow.png";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 const IS_IS_NOT = {
   is: ["Collaborative", "Confidential", "Reflection", "Growth", "Personal"],
@@ -24,6 +25,7 @@ const FIRST_SESSION = [
 ];
 
 export default function AboutTherapy() {
+  useDocumentTitle("About Therapy | Borrowed Blues");
   return (
     <>
       {/* HERO — the illustration fills the full section (1280x740); the header

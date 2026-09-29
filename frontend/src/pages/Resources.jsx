@@ -5,6 +5,7 @@ import copingIceInHand from "@/assets/coping-ice-in-hand.png";
 import copingColdWaterSplash from "@/assets/coping-cold-water-splash.png";
 import copingButterflyHug from "@/assets/coping-butterfly-hug.png";
 import copingGrounding from "@/assets/coping-grounding.png";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 /* ---------- content ---------- */
 
@@ -372,6 +373,7 @@ function JournalPanel({ testId, heading, prompt, value, onChange, onErase }) {
 /* ---------- page ---------- */
 
 export default function Resources() {
+  useDocumentTitle("Resources | Borrowed Blues");
   const [activeExercise, setActiveExercise] = useState(null);
   const [openCoping, setOpenCoping] = useState(null);
   const [sosText, setSosText] = useState("");

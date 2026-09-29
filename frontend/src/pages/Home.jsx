@@ -2,6 +2,7 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 import { WatercolorEstuary, WatercolorRipple, WatercolorBird, WatercolorSapling, WatercolorPair, WatercolorFlock, WatercolorEucalyptus, BirdFlock } from "@/components/Watercolor";
 import ConsultationDialog from "@/components/ConsultationDialog";
 import { Link } from "react-router-dom";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 const PILLARS = [
   { title: "Understanding", body: "Learn what therapy is and how sessions typically feel.", Art: WatercolorFlock },
@@ -44,6 +45,7 @@ const FAQS = [
 ];
 
 export default function Home() {
+  useDocumentTitle("Borrowed Blues | Therapy Practice");
   return (
     <>
       {/* HERO — pulled up under the sticky transparent header so the image reads

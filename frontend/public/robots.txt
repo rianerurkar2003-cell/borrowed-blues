@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /portal
+Disallow: /therapist
+Disallow: /reset-password
+Disallow: /dashboard
+
+Sitemap: https://borrowedblues.com/sitemap.xml
