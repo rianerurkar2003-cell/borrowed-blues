@@ -23,6 +23,7 @@ export default function ConsultationDialog({ children, defaultReason = "" }) {
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [therapistName, setTherapistName] = useState("");
+  const [replyWindowText, setReplyWindowText] = useState("one to two working days");
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -33,7 +34,10 @@ export default function ConsultationDialog({ children, defaultReason = "" }) {
 
   useEffect(() => {
     publicService.therapistProfile()
-      .then((p) => setTherapistName((p?.name || "").split(" ")[0] || ""))
+      .then((p) => {
+        setTherapistName((p?.name || "").split(" ")[0] || "");
+        if (p?.reply_window_text) setReplyWindowText(p.reply_window_text);
+      })
       .catch(() => {});
   }, []);
 
@@ -102,8 +106,8 @@ export default function ConsultationDialog({ children, defaultReason = "" }) {
                     Your note is on its way.
                   </DialogTitle>
                   <DialogDescription className="mt-2 text-bb-forest/70 text-center">
-                    {firstName} usually replies within one to two working
-                    days. In the meantime, take your time. There is nothing
+                    {firstName} usually replies within {replyWindowText}.
+                    In the meantime, take your time. There is nothing
                     you need to do next.
                   </DialogDescription>
                 </DialogHeader>

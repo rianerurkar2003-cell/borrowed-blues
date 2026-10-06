@@ -164,7 +164,7 @@ router.get(
       "SELECT * FROM consultation_requests WHERE status = 'new' ORDER BY created_at DESC LIMIT 20",
     );
     const [reflections] = await pool.query(
-      "SELECT * FROM reflections WHERE is_draft = 0 ORDER BY created_at DESC LIMIT 10",
+      "SELECT * FROM reflections WHERE is_draft = 0 AND visibility = 'shared' ORDER BY created_at DESC LIMIT 10",
     );
     const [[{ client_count: clientCount }]] = await pool.query(
       "SELECT COUNT(*) AS client_count FROM users WHERE role = 'client'",
@@ -377,8 +377,13 @@ router.post(
 router.get(
   "/reflections",
   asyncHandler(async (req, res) => {
+    const { client_id: clientId } = req.query;
+    if (!clientId) throw new ApiError(400, "client_id required");
+    const [[client]] = await pool.query("SELECT id FROM users WHERE id = ? AND role = 'client'", [clientId]);
+    if (!client) throw new ApiError(404, "Client not found");
     const [rows] = await pool.query(
-      "SELECT * FROM reflections WHERE is_draft = 0 ORDER BY created_at DESC LIMIT 200",
+      "SELECT * FROM reflections WHERE user_id = ? AND visibility = 'shared' AND is_draft = 0 ORDER BY created_at DESC LIMIT 200",
+      [clientId],
     );
     res.json(rows.map(toReflection));
   }),

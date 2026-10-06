@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { clientService } from "@/services/client.service";
 import { toAppError } from "@/lib/errors";
 import { toast } from "sonner";
+import { JOURNAL } from "@/constants/testIds";
 
 const MOODS = ["gentle", "tender", "quiet", "tired", "hopeful", "curious"];
 
@@ -10,6 +11,7 @@ export default function Journal() {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [mood, setMood] = useState("gentle");
+  const [shared, setShared] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -26,9 +28,20 @@ export default function Journal() {
   const save = async (is_draft) => {
     if (!body.trim()) return toast.error("Write a little something first.");
     try {
-      await clientService.createReflection({ title: title || "Untitled", body, mood, is_draft });
+      await clientService.createReflection({
+        title: title || "Untitled", body, mood, is_draft,
+        visibility: shared ? "shared" : "private",
+      });
       toast.success(is_draft ? "Saved as a draft." : "Reflection kept.");
-      setTitle(""); setBody(""); setMood("gentle"); load();
+      setTitle(""); setBody(""); setMood("gentle"); setShared(false); load();
+    } catch (err) { toast.error(toAppError(err).message); }
+  };
+
+  const toggleVisibility = async (entry) => {
+    const next = entry.visibility === "shared" ? "private" : "shared";
+    try {
+      await clientService.updateReflectionVisibility(entry.id, next);
+      setEntries((prev) => prev.map((e) => (e.id === entry.id ? { ...e, visibility: next } : e)));
     } catch (err) { toast.error(toAppError(err).message); }
   };
 
@@ -38,14 +51,14 @@ export default function Journal() {
       <h1 className="mt-3 font-serif text-4xl text-bb-forest">Reflection journal</h1>
 
       <div className="mt-10 grid lg:grid-cols-[1fr_1.2fr] gap-8">
-        <div className="bg-bb-warm rounded-3xl p-8 shadow-soft" data-testid="journal-editor">
+        <div className="bg-bb-warm rounded-3xl p-8 shadow-soft" data-testid={JOURNAL.editor}>
           <p className="bb-eyebrow">A new entry</p>
           <input value={title} onChange={(e) => setTitle(e.target.value)}
             placeholder="Title (optional)"
             className="mt-5 w-full text-2xl font-serif text-bb-forest bg-transparent border-b border-bb-moss/70 focus:border-bb-teal py-2 outline-none"/>
           <textarea rows={9} value={body} onChange={(e) => setBody(e.target.value)}
             placeholder="Even a sentence is enough."
-            data-testid="journal-body"
+            data-testid={JOURNAL.body}
             className="mt-4 w-full bg-transparent text-bb-forest/85 outline-none leading-relaxed resize-none rounded-lg focus-visible:ring-2 focus-visible:ring-bb-teal/40"/>
           <div className="mt-4 flex items-center gap-3">
             <label className="text-sm text-bb-forest/70">Mood</label>
@@ -54,9 +67,18 @@ export default function Journal() {
               {MOODS.map((m) => <option key={m}>{m}</option>)}
             </select>
           </div>
+          <label className="mt-4 flex items-start gap-2.5 cursor-pointer">
+            <input type="checkbox" checked={shared} onChange={(e) => setShared(e.target.checked)}
+              data-testid={JOURNAL.shareToggle}
+              className="mt-0.5 h-4 w-4 rounded border-bb-moss text-bb-teal focus-visible:ring-2 focus-visible:ring-bb-teal/40"/>
+            <span className="text-sm text-bb-forest/70">
+              Share this entry with Anushka
+              <span className="block text-xs text-bb-forest/50">She'll be able to read it. Off means only you can see it.</span>
+            </span>
+          </label>
           <div className="mt-6 flex items-center gap-3">
-            <button onClick={() => save(false)} data-testid="journal-save" className="px-5 py-2.5 rounded-full bg-bb-forest text-bb-cream text-sm">Keep this</button>
-            <button onClick={() => save(true)}  data-testid="journal-draft" className="px-5 py-2.5 rounded-full border border-bb-forest/30 text-bb-forest text-sm">Save as draft</button>
+            <button onClick={() => save(false)} data-testid={JOURNAL.save} className="px-5 py-2.5 rounded-full bg-bb-forest text-bb-cream text-sm">Keep this</button>
+            <button onClick={() => save(true)}  data-testid={JOURNAL.draft} className="px-5 py-2.5 rounded-full border border-bb-forest/30 text-bb-forest text-sm">Save as draft</button>
           </div>
         </div>
 
@@ -69,7 +91,7 @@ export default function Journal() {
           ) : entries.length === 0 ? (
             <p className="text-bb-forest/60">Nothing yet.</p>
           ) : (
-            <ul className="space-y-4" data-testid="journal-list">
+            <ul className="space-y-4" data-testid={JOURNAL.list}>
               {entries.map((r) => (
                 <li key={r.id} className="bg-bb-warm rounded-2xl p-6 shadow-soft">
                   <div className="flex items-center justify-between">
@@ -80,6 +102,10 @@ export default function Journal() {
                   <div className="mt-3 flex gap-2 text-xs">
                     <span className="px-2.5 py-1 rounded-full bg-bb-moss/70 text-bb-forest">{r.mood}</span>
                     {r.is_draft && <span className="px-2.5 py-1 rounded-full bg-bb-blue-2 text-bb-forest">draft</span>}
+                    <button onClick={() => toggleVisibility(r)} data-testid={JOURNAL.visibilityToggle}
+                      className="px-2.5 py-1 rounded-full bg-bb-moss/50 text-bb-forest hover:bg-bb-moss/70 transition-colors">
+                      {r.visibility === "shared" ? "Shared" : "Only you"}
+                    </button>
                   </div>
                 </li>
               ))}

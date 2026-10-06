@@ -58,6 +58,11 @@ const ReflectionIn = z.object({
   body: z.string(),
   mood: z.string().optional().nullable(),
   is_draft: z.boolean().optional().default(false),
+  visibility: z.enum(["private", "shared"]).optional().default("private"),
+});
+
+const ReflectionVisibilityIn = z.object({
+  visibility: z.enum(["private", "shared"]),
 });
 
 const HomeworkIn = z.object({
@@ -96,6 +101,6 @@ const CreateClientIn = z.object({
 
 module.exports = {
   LoginRequest, RegisterRequest, ForgotPasswordRequest, ResetPasswordRequest,
-  AppointmentIn, ConsultationRequestIn, SessionSummaryIn, ReflectionIn,
+  AppointmentIn, ConsultationRequestIn, SessionSummaryIn, ReflectionIn, ReflectionVisibilityIn,
   HomeworkIn, HomeworkStatusIn, ResourceIn, CreateClientIn,
 };

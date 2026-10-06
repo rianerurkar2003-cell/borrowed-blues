@@ -55,8 +55,8 @@ export const therapistService = {
     await http.patch(`/therapist/requests/${id}`, { status });
   },
 
-  reflections: async (): Promise<Reflection[]> =>
-    (await http.get<Reflection[]>("/therapist/reflections")).data,
+  reflections: async (clientId: string): Promise<Reflection[]> =>
+    (await http.get<Reflection[]>("/therapist/reflections", { params: { client_id: clientId } })).data,
 
   sessionNotes: async (clientId?: string): Promise<SessionNote[]> =>
     (await http.get<SessionNote[]>("/therapist/session-notes", { params: clientId ? { client_id: clientId } : undefined })).data,

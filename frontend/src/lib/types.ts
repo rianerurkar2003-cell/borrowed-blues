@@ -103,6 +103,7 @@ export interface Reflection {
   body: string;
   mood?: string;
   is_draft: boolean;
+  visibility: "private" | "shared";
   created_at: string;
 }
 
@@ -111,6 +112,7 @@ export interface ReflectionInput {
   body: string;
   mood?: string;
   is_draft: boolean;
+  visibility: "private" | "shared";
 }
 
 export type ResourceKind = "article" | "pdf" | "video" | "link";
@@ -167,6 +169,7 @@ export interface TherapistProfile {
   qualifications: { label: string; value: string }[];
   areas: string[];
   pillars: { title: string; body: string }[];
+  reply_window_text?: string;
 }
 
 export interface TherapistDashboardPayload {

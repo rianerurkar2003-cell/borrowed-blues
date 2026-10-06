@@ -27,6 +27,9 @@ export const clientService = {
   createReflection: async (input: ReflectionInput): Promise<Reflection> =>
     (await http.post<Reflection>("/client/reflections", input)).data,
 
+  updateReflectionVisibility: async (id: string, visibility: "private" | "shared"): Promise<Reflection> =>
+    (await http.patch<Reflection>(`/client/reflections/${id}`, { visibility })).data,
+
   homework: async (): Promise<Homework[]> =>
     (await http.get<Homework[]>("/client/homework")).data,
 

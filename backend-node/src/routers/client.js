@@ -8,7 +8,7 @@ const { ApiError } = require("../lib/ApiError");
 const asyncHandler = require("../lib/asyncHandler");
 const { requireRole } = require("../authMiddleware");
 const { validate } = require("../validation/validate");
-const { AppointmentIn, ReflectionIn, HomeworkStatusIn } = require("../validation/schemas");
+const { AppointmentIn, ReflectionIn, ReflectionVisibilityIn, HomeworkStatusIn } = require("../validation/schemas");
 
 const router = express.Router();
 router.use(requireRole("client"));
@@ -114,11 +114,25 @@ router.post(
       id: newId(), user_id: req.user.id, ...req.body, created_at: new Date(),
     };
     await pool.query(
-      "INSERT INTO reflections (id, user_id, title, body, mood, is_draft, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [doc.id, doc.user_id, doc.title, doc.body, doc.mood || null, doc.is_draft ? 1 : 0, doc.created_at],
+      "INSERT INTO reflections (id, user_id, title, body, mood, is_draft, visibility, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      [doc.id, doc.user_id, doc.title, doc.body, doc.mood || null, doc.is_draft ? 1 : 0, doc.visibility, doc.created_at],
     );
     const [rows] = await pool.query("SELECT * FROM reflections WHERE id = ?", [doc.id]);
     res.json(toReflection(rows[0]));
+  }),
+);
+
+router.patch(
+  "/reflections/:reflectionId",
+  validate(ReflectionVisibilityIn),
+  asyncHandler(async (req, res) => {
+    const { reflectionId } = req.params;
+    await pool.query(
+      "UPDATE reflections SET visibility = ? WHERE id = ? AND user_id = ?",
+      [req.body.visibility, reflectionId, req.user.id],
+    );
+    const [rows] = await pool.query("SELECT * FROM reflections WHERE id = ?", [reflectionId]);
+    res.json(rows[0] ? toReflection(rows[0]) : null);
   }),
 );
 
