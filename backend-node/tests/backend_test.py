@@ -310,3 +310,48 @@ class TestClient:
         # revert
         client_sess.patch(f"{BASE}/api/client/homework/{hid}",
                           json={"completed": False, "completed_items": []})
+
+
+# ---------- Reflection privacy (Phase 0) ----------
+class TestReflectionPrivacy:
+    def test_therapist_cannot_read_private_reflection(self, therapist, client_sess):
+        r = client_sess.post(f"{BASE}/api/client/reflections", json={
+            "title": "TEST_private_reflection", "body": "should never leak", "is_draft": False,
+        })
+        assert r.status_code == 200
+        reflection = r.json()
+        assert reflection["visibility"] == "private"
+
+        clients = therapist.get(f"{BASE}/api/therapist/clients").json()
+        seeded = next(c for c in clients if c["email"] == CLIENT["email"])
+
+        listing = therapist.get(f"{BASE}/api/therapist/reflections",
+                                 params={"client_id": seeded["id"]}).json()
+        assert all(x["id"] != reflection["id"] for x in listing), "Private reflection leaked to therapist"
+
+    def test_reflections_requires_client_id(self, therapist):
+        r = therapist.get(f"{BASE}/api/therapist/reflections")
+        assert r.status_code == 400
+
+    def test_shared_reflection_is_visible_to_therapist(self, therapist, client_sess):
+        r = client_sess.post(f"{BASE}/api/client/reflections", json={
+            "title": "TEST_shared_reflection", "body": "fine to share", "is_draft": False,
+            "visibility": "shared",
+        })
+        assert r.status_code == 200
+        reflection = r.json()
+        clients = therapist.get(f"{BASE}/api/therapist/clients").json()
+        seeded = next(c for c in clients if c["email"] == CLIENT["email"])
+        listing = therapist.get(f"{BASE}/api/therapist/reflections",
+                                 params={"client_id": seeded["id"]}).json()
+        assert any(x["id"] == reflection["id"] for x in listing)
+
+    def test_client_can_toggle_reflection_visibility(self, client_sess):
+        r = client_sess.post(f"{BASE}/api/client/reflections", json={
+            "title": "TEST_toggle_reflection", "body": "toggle me", "is_draft": False,
+        })
+        reflection_id = r.json()["id"]
+        patch = client_sess.patch(f"{BASE}/api/client/reflections/{reflection_id}",
+                                   json={"visibility": "shared"})
+        assert patch.status_code == 200
+        assert patch.json()["visibility"] == "shared"
