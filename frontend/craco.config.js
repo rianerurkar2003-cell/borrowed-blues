@@ -1,6 +1,13 @@
 // craco.config.js
 const path = require("path");
-require("dotenv").config();
+// Plain dotenv.config() always loads .env, regardless of NODE_ENV -- unlike
+// CRA's own env cascade, it never falls through to .env.production for
+// `craco build`. Since dotenv doesn't override a var that's already set,
+// that silently shadows .env.production's values with .env's. Load the
+// right file explicitly instead.
+require("dotenv").config({
+  path: path.resolve(__dirname, process.env.NODE_ENV === "production" ? ".env.production" : ".env"),
+});
 
 // Check if we're in development/preview mode (not production build)
 // Craco sets NODE_ENV=development for start, NODE_ENV=production for build
