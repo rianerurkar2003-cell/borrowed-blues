@@ -142,7 +142,7 @@ const toAppointment = (r) => withIsoDates(r);
 const toReflection = (r) => withIsoDates({ ...r, is_draft: !!r.is_draft });
 const toSessionNote = (r) => withIsoDates({ ...r, shared_with_client: !!r.shared_with_client });
 const toResource = (r) => withIsoDates({ ...r, is_public: !!r.is_public });
-const toRequest = (r) => withIsoDates(r);
+const toRequest = (r) => withIsoDates({ ...r, is_adult: !!r.is_adult });
 const toHomework = (r) => withIsoDates({ ...r, completed: !!r.completed });
 
 router.get(

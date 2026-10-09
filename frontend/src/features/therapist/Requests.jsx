@@ -42,7 +42,14 @@ export default function Requests() {
             <li key={r.id} className="bg-bb-warm rounded-3xl p-8 shadow-soft grid md:grid-cols-[1fr_auto] gap-6 items-center">
               <div>
                 <p className="font-serif text-2xl text-bb-forest">{r.name}</p>
-                <p className="text-sm text-bb-forest/60">{r.email} {r.phone ? `· ${r.phone}` : ""}</p>
+                <p className="text-sm text-bb-forest/60">
+                  {[r.email, r.phone].filter(Boolean).join(" · ")}
+                </p>
+                <p className="mt-2 text-sm text-bb-teal">
+                  Prefers {r.preferred_contact === "phone_call" ? "a phone call" : "email"}
+                  {" "}· {r.preferred_language}
+                  {!r.is_adult && " · Under 18"}
+                </p>
                 <p className="mt-3 text-bb-forest/75">{r.reason}</p>
                 {r.preferred_time && <p className="mt-2 text-sm text-bb-teal">Preferred: {r.preferred_time}</p>}
               </div>

@@ -148,6 +148,7 @@ function Footer() {
             <li><Link to="/about-therapy" className="hover:text-bb-forest">About therapy</Link></li>
             <li><Link to="/meet-your-therapist" className="hover:text-bb-forest">Meet your therapist</Link></li>
             <li><Link to="/resources" className="hover:text-bb-forest">Resources</Link></li>
+            <li><Link to="/reach-out" className="hover:text-bb-forest">Reach out</Link></li>
             <li><Link to="/login" className="hover:text-bb-forest">Client login</Link></li>
           </ul>
         </div>

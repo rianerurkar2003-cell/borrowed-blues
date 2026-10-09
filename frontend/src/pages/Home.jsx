@@ -196,7 +196,7 @@ export default function Home() {
       </section>
 
       {/* FAQ */}
-      <section className="bg-bb-cream">
+      <section id="faq" className="bg-bb-cream">
         <div className="bb-container py-20 md:py-28 grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] gap-12 lg:gap-20">
           <div>
             <h2 className="font-serif text-4xl md:text-5xl text-bb-forest leading-[1.05]">

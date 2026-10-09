@@ -61,11 +61,17 @@ router.post(
       created_at: new Date(),
     };
     await pool.query(
-      "INSERT INTO consultation_requests (id, name, email, phone, reason, preferred_time, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-      [doc.id, doc.name, doc.email, doc.phone || null, doc.reason || null, doc.preferred_time || null, doc.status, doc.created_at],
+      `INSERT INTO consultation_requests
+        (id, name, email, phone, preferred_contact, preferred_language, is_adult, reason, preferred_time, status, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        doc.id, doc.name, doc.email || null, doc.phone || null,
+        doc.preferred_contact, doc.preferred_language, doc.is_adult ? 1 : 0,
+        doc.reason || null, doc.preferred_time || null, doc.status, doc.created_at,
+      ],
     );
     const [rows] = await pool.query("SELECT * FROM consultation_requests WHERE id = ?", [doc.id]);
-    res.json(clean(withIsoDates(rows[0])));
+    res.json(clean(withIsoDates({ ...rows[0], is_adult: !!rows[0].is_adult })));
   }),
 );
 

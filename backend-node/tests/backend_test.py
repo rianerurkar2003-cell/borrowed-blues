@@ -163,12 +163,34 @@ class TestAuth:
     def test_consultation_request_public_then_visible_to_therapist(self, anon, therapist):
         unique = f"TEST_{uuid.uuid4().hex[:8]}"
         payload = {"name": f"{unique} Person", "email": f"{unique}@example.com",
-                   "reason": "TEST reason", "preferred_time": "evenings"}
+                   "preferred_contact": "email", "preferred_language": "English",
+                   "is_adult": True, "reason": "TEST reason", "preferred_time": "evenings"}
         r = anon.post(f"{BASE}/api/consultation-requests", json=payload)
         assert r.status_code == 200, r.text
         created_id = r.json()["id"]
         reqs = therapist.get(f"{BASE}/api/therapist/requests").json()
-        assert any(x["id"] == created_id for x in reqs), "Consultation request not visible to therapist"
+        match = next((x for x in reqs if x["id"] == created_id), None)
+        assert match, "Consultation request not visible to therapist"
+        assert match["preferred_contact"] == "email"
+        assert match["preferred_language"] == "English"
+        assert match["is_adult"] is True
+
+    def test_consultation_request_phone_only_no_email(self, anon):
+        unique = f"TEST_{uuid.uuid4().hex[:8]}"
+        r = anon.post(f"{BASE}/api/consultation-requests", json={
+            "name": f"{unique} Phone", "phone": "+911234567890",
+            "preferred_contact": "phone_call", "preferred_language": "Hindi", "is_adult": True,
+        })
+        assert r.status_code == 200, r.text
+        assert r.json()["email"] is None
+
+    def test_consultation_request_needs_email_or_phone(self, anon):
+        unique = f"TEST_{uuid.uuid4().hex[:8]}"
+        r = anon.post(f"{BASE}/api/consultation-requests", json={
+            "name": f"{unique} Neither",
+            "preferred_contact": "email", "preferred_language": "English", "is_adult": True,
+        })
+        assert r.status_code == 422
 
     def test_forgot_password_no_leak(self, anon):
         r1 = anon.post(f"{BASE}/api/auth/forgot-password",

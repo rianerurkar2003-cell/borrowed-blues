@@ -141,11 +141,16 @@ export interface ResourceInput {
 
 export type ConsultationStatus = "new" | "accepted" | "declined";
 
+export type PreferredContact = "email" | "phone_call";
+
 export interface ConsultationRequest {
   id: string;
   name: string;
-  email: string;
+  email?: string;
   phone?: string;
+  preferred_contact: PreferredContact;
+  preferred_language: string;
+  is_adult: boolean;
   reason?: string;
   preferred_time?: string;
   status: ConsultationStatus;
@@ -154,8 +159,11 @@ export interface ConsultationRequest {
 
 export interface ConsultationRequestInput {
   name: string;
-  email: string;
+  email?: string;
   phone?: string;
+  preferred_contact: PreferredContact;
+  preferred_language: string;
+  is_adult: boolean;
   reason?: string;
   preferred_time?: string;
 }
@@ -170,6 +178,7 @@ export interface TherapistProfile {
   areas: string[];
   pillars: { title: string; body: string }[];
   reply_window_text?: string;
+  languages?: string[];
 }
 
 export interface TherapistDashboardPayload {

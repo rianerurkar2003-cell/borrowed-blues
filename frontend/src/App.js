@@ -14,6 +14,7 @@ import "@/App.css";
 const AboutTherapy    = lazy(() => import("@/pages/AboutTherapy"));
 const MeetTherapist   = lazy(() => import("@/pages/MeetTherapist"));
 const PublicResources = lazy(() => import("@/pages/Resources"));
+const ReachOut        = lazy(() => import("@/pages/ReachOut"));
 const ResetPassword   = lazy(() => import("@/pages/ResetPassword"));
 const ClientPortal    = lazy(() => import("@/features/client"));
 const TherapistPortal = lazy(() => import("@/features/therapist"));
@@ -67,6 +68,7 @@ export default function App() {
                   <Route path="/about-therapy"       element={<Public><AboutTherapy /></Public>} />
                   <Route path="/meet-your-therapist" element={<Public><MeetTherapist /></Public>} />
                   <Route path="/resources"           element={<Public><PublicResources /></Public>} />
+                  <Route path="/reach-out"           element={<Public><ReachOut /></Public>} />
                   <Route path="/login"               element={<Login />} />
                   <Route path="/reset-password"      element={<ResetPassword />} />
 

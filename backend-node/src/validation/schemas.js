@@ -38,10 +38,16 @@ const AppointmentIn = z.object({
 
 const ConsultationRequestIn = z.object({
   name: z.string(),
-  email,
+  email: z.string().email().optional().nullable(),
   phone: z.string().optional().nullable(),
+  preferred_contact: z.enum(["email", "phone_call"]),
+  preferred_language: z.string(),
+  is_adult: z.boolean(),
   reason: z.string().optional().nullable(),
   preferred_time: z.string().optional().nullable(),
+}).refine((data) => !!(data.email || data.phone), {
+  message: "Share an email or phone number so we can reach you.",
+  path: ["email"],
 });
 
 const SessionSummaryIn = z.object({
