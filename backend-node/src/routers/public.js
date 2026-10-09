@@ -8,8 +8,46 @@ const { withIsoDates } = require("../lib/dates");
 const asyncHandler = require("../lib/asyncHandler");
 const { validate } = require("../validation/validate");
 const { ConsultationRequestIn } = require("../validation/schemas");
+const { sendEmail } = require("../mail");
+const config = require("../config");
 
 const router = express.Router();
+
+const CONTACT_LABEL = { email: "email", phone_call: "a phone call" };
+
+async function sendTherapistNewRequestEmail(doc) {
+  try {
+    const contactLine = [doc.email, doc.phone].filter(Boolean).join(" · ") || "no contact details given";
+    await sendEmail(
+      config.ADMIN_EMAIL,
+      `New consultation request: ${doc.name}`,
+      `<p>${doc.name} reached out via Borrowed Blues.</p>` +
+        `<p>Contact: ${contactLine}<br/>Prefers: ${CONTACT_LABEL[doc.preferred_contact] || doc.preferred_contact}, ${doc.preferred_language}</p>` +
+        (doc.reason ? `<p>Note: ${doc.reason}</p>` : "") +
+        `<p>See it in your Requests inbox to accept or decline.</p>`,
+      `${doc.name} reached out via Borrowed Blues.\nContact: ${contactLine}\nPrefers: ${CONTACT_LABEL[doc.preferred_contact] || doc.preferred_contact}, ${doc.preferred_language}\n` +
+        (doc.reason ? `Note: ${doc.reason}\n` : ""),
+    );
+  } catch (err) {
+    console.error("[mail] new-request notification to therapist failed:", err.message);
+  }
+}
+
+async function sendSubmitterConfirmationEmail(doc, replyWindowText) {
+  if (!doc.email) return;
+  try {
+    await sendEmail(
+      doc.email,
+      "Your note is on its way",
+      `<p>Hi ${doc.name || ""},</p>` +
+        `<p>Thanks for reaching out to Borrowed Blues. Anushka reads notes personally and usually replies within ${replyWindowText}.</p>` +
+        `<p>Can't see a reply? Check your spam folder.</p>`,
+      `Thanks for reaching out to Borrowed Blues. Anushka reads notes personally and usually replies within ${replyWindowText}.`,
+    );
+  } catch (err) {
+    console.error("[mail] submitter confirmation email failed:", err.message);
+  }
+}
 
 router.get("/", (req, res) => {
   res.json({ service: "Borrowed Blues API", status: "ok" });
@@ -71,7 +109,15 @@ router.post(
       ],
     );
     const [rows] = await pool.query("SELECT * FROM consultation_requests WHERE id = ?", [doc.id]);
-    res.json(clean(withIsoDates({ ...rows[0], is_adult: !!rows[0].is_adult })));
+    const created = { ...rows[0], is_adult: !!rows[0].is_adult };
+    res.json(clean(withIsoDates(created)));
+
+    sendTherapistNewRequestEmail(created).catch((err) =>
+      console.error("[mail] unhandled new-request notification error:", err),
+    );
+    pool.query("SELECT reply_window_text FROM therapist_profile WHERE slug = 'primary'")
+      .then(([[profile]]) => sendSubmitterConfirmationEmail(created, profile?.reply_window_text || "one to two working days"))
+      .catch((err) => console.error("[mail] unhandled submitter confirmation error:", err));
   }),
 );
 
