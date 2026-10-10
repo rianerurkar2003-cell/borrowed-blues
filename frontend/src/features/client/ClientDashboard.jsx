@@ -159,6 +159,14 @@ export default function ClientDashboard() {
       )}
 
       <BirdFlock className="mt-16 w-40 opacity-60 mx-auto"/>
+
+      {/* TODO(confirm): helpline wording/number, owned by Anushka (spec S8) */}
+      <p data-testid="crisis-note" className="mt-10 text-center text-xs text-bb-forest/45 max-w-md mx-auto leading-relaxed">
+        If you're in crisis or feel unsafe right now, please call Tele MANAS on{" "}
+        <a href="tel:14416" className="underline hover:text-bb-forest/70">14416</a>
+        {" "}or emergency services on{" "}
+        <a href="tel:112" className="underline hover:text-bb-forest/70">112</a>.
+      </p>
     </div>
   );
 }
