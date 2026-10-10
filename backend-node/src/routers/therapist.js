@@ -224,14 +224,53 @@ router.delete(
 
     // No cascading FK on these tables, so clear them out before the user row
     // (appointments does have an FK to users, so it must go first or the
-    // final DELETE fails).
+    // final DELETE fails). client_profiles/emergency_contacts/intake_disclosures
+    // etc. (migration 005) have the same FK-with-no-cascade shape -- added here
+    // when they were introduced, same reasoning.
     await pool.query("DELETE FROM session_notes WHERE client_id = ?", [clientId]);
     await pool.query("DELETE FROM homework WHERE client_id = ?", [clientId]);
     await pool.query("DELETE FROM reflections WHERE user_id = ?", [clientId]);
     await pool.query("DELETE FROM appointments WHERE client_id = ?", [clientId]);
+    await pool.query("DELETE FROM consent_acknowledgements WHERE user_id = ?", [clientId]);
+    await pool.query("DELETE FROM consent_signatures WHERE user_id = ?", [clientId]);
+    await pool.query("DELETE FROM emergency_contacts WHERE user_id = ?", [clientId]);
+    await pool.query("DELETE FROM intake_disclosures WHERE user_id = ?", [clientId]);
+    await pool.query("DELETE FROM client_profiles WHERE user_id = ?", [clientId]);
     await pool.query("DELETE FROM users WHERE id = ?", [clientId]);
 
     res.json({ ok: true });
+  }),
+);
+
+router.get(
+  "/clients/:clientId/intake",
+  asyncHandler(async (req, res) => {
+    const { clientId } = req.params;
+    const [[client]] = await pool.query("SELECT id FROM users WHERE id = ? AND role = 'client'", [clientId]);
+    if (!client) throw new ApiError(404, "Client not found");
+
+    const [[profile]] = await pool.query("SELECT * FROM client_profiles WHERE user_id = ?", [clientId]);
+    const [[emergencyContact]] = await pool.query("SELECT * FROM emergency_contacts WHERE user_id = ?", [clientId]);
+    const [[disclosure]] = await pool.query("SELECT * FROM intake_disclosures WHERE user_id = ?", [clientId]);
+    const [[signature]] = await pool.query(
+      "SELECT typed_name, consent_version, signed_at FROM consent_signatures WHERE user_id = ? ORDER BY signed_at DESC LIMIT 1",
+      [clientId],
+    );
+
+    // Stage 3 ("what brings you here") UI doesn't exist yet -- disclosure
+    // rows won't exist until then, so this always resolves to the gentle
+    // default for now. Never a raw blank, per spec.
+    const disclosureLabel = (!disclosure || !disclosure.mode || disclosure.mode === "in_session")
+      ? "Prefers to share in session"
+      : null;
+
+    res.json({
+      profile: profile ? withIsoDates(profile, ["updated_at"]) : null,
+      emergency_contact: emergencyContact ? withIsoDates(emergencyContact, ["updated_at"]) : null,
+      disclosure: disclosure ? withIsoDates(disclosure, ["updated_at"]) : null,
+      disclosure_label: disclosureLabel,
+      consent_signature: signature ? withIsoDates(signature, ["signed_at"]) : null,
+    });
   }),
 );
 

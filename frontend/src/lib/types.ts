@@ -243,6 +243,14 @@ export interface OnboardingPayload {
   };
 }
 
+export interface ClientIntake {
+  profile: ClientProfile | null;
+  emergency_contact: { name: string; phone: string; relationship?: string; updated_at: string } | null;
+  disclosure: { mode?: string; free_text?: string; prompt_answers?: unknown; hopes?: unknown; updated_at: string } | null;
+  disclosure_label: string | null;
+  consent_signature: { typed_name: string; consent_version: string; signed_at: string } | null;
+}
+
 export interface LoginInput {
   email: string;
   password: string;

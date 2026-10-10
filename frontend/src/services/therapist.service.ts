@@ -2,6 +2,7 @@ import { http } from "@/lib/http";
 import type {
   Appointment,
   AppointmentInput,
+  ClientIntake,
   ConsultationRequest,
   GoogleCalendarStatus,
   Homework,
@@ -28,6 +29,9 @@ export const therapistService = {
   removeClient: async (clientId: string): Promise<void> => {
     await http.delete(`/therapist/clients/${clientId}`);
   },
+
+  clientIntake: async (clientId: string): Promise<ClientIntake> =>
+    (await http.get<ClientIntake>(`/therapist/clients/${clientId}/intake`)).data,
 
   googleStatus: async (): Promise<GoogleCalendarStatus> =>
     (await http.get<GoogleCalendarStatus>("/therapist/google/status")).data,

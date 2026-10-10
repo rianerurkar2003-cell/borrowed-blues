@@ -15,6 +15,7 @@ export default function Clients() {
   const [clients, setClients] = useState([]);
   const [selected, setSelected] = useState(null);
   const [notes, setNotes] = useState([]);
+  const [intake, setIntake] = useState(null);
   const [noteForm, setNoteForm] = useState(EMPTY_NOTE);
   const [hwForm, setHwForm] = useState(EMPTY_HW);
   const [loading, setLoading] = useState(true);
@@ -83,6 +84,11 @@ export default function Clients() {
     therapistService.sessionNotes(clientId).then(setNotes).catch((e) => toast.error(toAppError(e).message));
   }, []);
   useEffect(() => { if (selected) loadNotes(selected.id); }, [selected, loadNotes]);
+
+  useEffect(() => {
+    if (!selected) { setIntake(null); return; }
+    therapistService.clientIntake(selected.id).then(setIntake).catch((e) => toast.error(toAppError(e).message));
+  }, [selected]);
 
   const addNote = async (e) => {
     e.preventDefault();
@@ -165,6 +171,60 @@ export default function Clients() {
                   Remove client
                 </button>
               </div>
+
+              <section className="mt-6 bg-bb-warm rounded-3xl p-8 shadow-soft" data-testid="intake-section">
+                <p className="bb-eyebrow">Intake</p>
+                {(() => {
+                  const p = intake?.profile;
+                  const rows = p ? [
+                    ["Preferred name", p.preferred_name],
+                    ["Pronouns", p.pronouns],
+                    ["Gender", p.gender_text],
+                    ["Age", p.age],
+                    ["City", p.city],
+                    ["Timezone", p.timezone],
+                    ["Occupation", p.occupation],
+                  ].filter(([, v]) => v !== null && v !== undefined && v !== "") : [];
+                  return rows.length === 0 ? (
+                    <p className="mt-3 text-bb-forest/60">Nothing shared yet.</p>
+                  ) : (
+                    <dl className="mt-4 grid sm:grid-cols-2 gap-x-6 gap-y-3">
+                      {rows.map(([label, value]) => (
+                        <div key={label}>
+                          <dt className="text-xs text-bb-forest/50">{label}</dt>
+                          <dd className="text-bb-forest/85">{value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  );
+                })()}
+
+                {intake?.emergency_contact && (
+                  <div className="mt-5 pt-5 border-t border-bb-moss/60">
+                    <p className="text-xs text-bb-forest/50">Emergency contact</p>
+                    <p className="mt-1 text-bb-forest/85">
+                      {intake.emergency_contact.name} · {intake.emergency_contact.phone}
+                      {intake.emergency_contact.relationship && ` (${intake.emergency_contact.relationship})`}
+                    </p>
+                  </div>
+                )}
+
+                <div className="mt-5 pt-5 border-t border-bb-moss/60">
+                  <p className="text-xs text-bb-forest/50">What brings them here</p>
+                  <p className="mt-1 text-bb-forest/85">
+                    {intake?.disclosure_label || intake?.disclosure?.free_text || "Nothing shared yet."}
+                  </p>
+                </div>
+
+                {intake?.consent_signature && (
+                  <div className="mt-5 pt-5 border-t border-bb-moss/60">
+                    <p className="text-xs text-bb-forest/50">Consent signed</p>
+                    <p className="mt-1 text-bb-forest/85">
+                      {intake.consent_signature.typed_name} · {new Date(intake.consent_signature.signed_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                )}
+              </section>
 
               <form onSubmit={addNote} className="mt-6 bg-bb-warm rounded-3xl p-8 shadow-soft" data-testid="session-note-form">
                 <p className="bb-eyebrow">New session summary</p>

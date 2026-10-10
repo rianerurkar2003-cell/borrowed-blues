@@ -293,6 +293,37 @@ class TestTherapist:
                             json={"status": "accepted"})
         assert r.status_code == 200
 
+    def test_intake_visible_then_client_with_onboarding_data_can_be_deleted(self, therapist):
+        # Regression: client_profiles etc. (migration 005) have a user_id FK
+        # with no ON DELETE CASCADE -- deleting a client who had done any
+        # onboarding used to fail outright until the delete handler was
+        # taught to clear those tables first.
+        unique = f"TEST_{uuid.uuid4().hex[:8]}"
+        email = f"{unique}@example.com"
+        created = therapist.post(f"{BASE}/api/therapist/clients", json={
+            "name": unique, "email": email, "password": "TestPass123!",
+        })
+        assert created.status_code == 200, created.text
+        client_id = created.json()["id"]
+
+        client_sess = requests.Session()
+        login = _login(client_sess, {"email": email, "password": "TestPass123!"})
+        assert login.status_code == 200, login.text
+        onboarded = client_sess.put(f"{BASE}/api/client/onboarding", json={
+            "preferred_name": unique, "city": "Pune", "stage1_status": "done",
+        })
+        assert onboarded.status_code == 200, onboarded.text
+
+        intake = therapist.get(f"{BASE}/api/therapist/clients/{client_id}/intake")
+        assert intake.status_code == 200, intake.text
+        d = intake.json()
+        assert d["profile"]["preferred_name"] == unique
+        assert d["profile"]["city"] == "Pune"
+        assert d["disclosure_label"] == "Prefers to share in session"
+
+        deleted = therapist.delete(f"{BASE}/api/therapist/clients/{client_id}")
+        assert deleted.status_code == 200, deleted.text
+
 
 # ---------- Client flow ----------
 class TestClient:
