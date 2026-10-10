@@ -189,11 +189,58 @@ export interface TherapistDashboardPayload {
   client_count: number;
 }
 
+export interface OnboardingStatus {
+  stage1: "not_started" | "in_progress" | "done" | "deferred_to_call";
+  stage2_done: boolean;
+  stage3: "not_started" | "in_progress" | "done" | "skipped" | "deferred_to_call";
+}
+
 export interface ClientDashboardPayload {
   upcoming: Appointment[];
   latest_summary: SessionNote | null;
   homework: Homework[];
   reflections: Reflection[];
+  onboarding_status: OnboardingStatus;
+}
+
+export type StructureMode = "step" | "single" | "call";
+
+export interface ClientProfile {
+  user_id: string;
+  preferred_name?: string;
+  pronouns?: string;
+  gender_text?: string;
+  age?: number;
+  city?: string;
+  timezone?: string;
+  occupation?: string;
+  structure_mode?: StructureMode;
+  stage1_status: OnboardingStatus["stage1"];
+  stage3_status: OnboardingStatus["stage3"];
+  updated_at: string;
+}
+
+export interface ClientProfileInput {
+  preferred_name?: string;
+  pronouns?: string;
+  gender_text?: string;
+  age?: number;
+  city?: string;
+  timezone?: string;
+  occupation?: string;
+  structure_mode?: StructureMode;
+  stage1_status?: OnboardingStatus["stage1"];
+}
+
+export interface OnboardingPayload {
+  profile: ClientProfile | null;
+  emergency_contact: { name: string; phone: string; relationship?: string; updated_at: string } | null;
+  disclosure: { mode?: string; free_text?: string; prompt_answers?: unknown; hopes?: unknown; updated_at: string } | null;
+  consent: {
+    version: string;
+    acknowledged_sections: string[];
+    signature: { typed_name: string; signed_at: string } | null;
+  };
 }
 
 export interface LoginInput {

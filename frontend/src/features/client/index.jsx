@@ -8,6 +8,7 @@ import Homework from "@/features/client/Homework";
 import ClientResources from "@/features/client/ClientResources";
 import ClientResourceDetail from "@/features/client/ClientResourceDetail";
 import ClientProfile from "@/features/client/ClientProfile";
+import ClientWelcome from "@/pages/ClientWelcome";
 
 /**
  * Client portal router. The shell (nav / logo / logout / mobile bar) is
@@ -26,6 +27,7 @@ export default function ClientPortal() {
     >
       <Routes>
         <Route index element={<ClientDashboard />} />
+        <Route path="welcome" element={<ClientWelcome />} />
         <Route path="appointments" element={<Appointments />} />
         <Route path="journal" element={<Journal />} />
         <Route path="homework" element={<Homework />} />

@@ -3,8 +3,11 @@ import type {
   Appointment,
   AppointmentInput,
   ClientDashboardPayload,
+  ClientProfile,
+  ClientProfileInput,
   Homework,
   HomeworkStatusInput,
+  OnboardingPayload,
   Reflection,
   ReflectionInput,
   Resource,
@@ -14,6 +17,12 @@ import type {
 export const clientService = {
   dashboard: async (): Promise<ClientDashboardPayload> =>
     (await http.get<ClientDashboardPayload>("/client/dashboard")).data,
+
+  onboarding: async (): Promise<OnboardingPayload> =>
+    (await http.get<OnboardingPayload>("/client/onboarding")).data,
+
+  updateOnboarding: async (input: ClientProfileInput): Promise<ClientProfile> =>
+    (await http.put<ClientProfile>("/client/onboarding", input)).data,
 
   appointments: async (): Promise<Appointment[]> =>
     (await http.get<Appointment[]>("/client/appointments")).data,

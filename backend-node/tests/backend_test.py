@@ -333,6 +333,45 @@ class TestClient:
         client_sess.patch(f"{BASE}/api/client/homework/{hid}",
                           json={"completed": False, "completed_items": []})
 
+    def test_onboarding_get_prefills_preferred_name(self, client_sess):
+        r = client_sess.get(f"{BASE}/api/client/onboarding")
+        assert r.status_code == 200, r.text
+        d = r.json()
+        assert d["profile"]["preferred_name"]
+        assert d["profile"]["stage1_status"] == "not_started"
+        assert d["consent"]["acknowledged_sections"] == []
+
+    def test_onboarding_put_preserves_status_when_omitted(self, client_sess):
+        r1 = client_sess.put(f"{BASE}/api/client/onboarding", json={
+            "preferred_name": "TEST_onboarding", "city": "Mumbai", "stage1_status": "in_progress",
+        })
+        assert r1.status_code == 200, r1.text
+        assert r1.json()["stage1_status"] == "in_progress"
+
+        r2 = client_sess.put(f"{BASE}/api/client/onboarding", json={
+            "preferred_name": "TEST_onboarding", "city": "Mumbai", "occupation": "Designer",
+        })
+        assert r2.status_code == 200, r2.text
+        assert r2.json()["stage1_status"] == "in_progress", "status should be preserved, not reset"
+        assert r2.json()["occupation"] == "Designer"
+
+        dash = client_sess.get(f"{BASE}/api/client/dashboard").json()
+        assert dash["onboarding_status"]["stage1"] == "in_progress"
+
+    def test_onboarding_put_structure_mode_only_does_not_wipe_other_fields(self, client_sess):
+        # Regression: the structure-chooser PUTs ONLY {structure_mode} -- a
+        # naive "always overwrite" upsert would null out everything else,
+        # including the server-prefilled preferred_name.
+        client_sess.put(f"{BASE}/api/client/onboarding", json={
+            "preferred_name": "TEST_structure_mode", "pronouns": "she/her",
+        })
+        r = client_sess.put(f"{BASE}/api/client/onboarding", json={"structure_mode": "step"})
+        assert r.status_code == 200, r.text
+        d = r.json()
+        assert d["structure_mode"] == "step"
+        assert d["preferred_name"] == "TEST_structure_mode", "unrelated field was wiped by a partial PUT"
+        assert d["pronouns"] == "she/her", "unrelated field was wiped by a partial PUT"
+
 
 # ---------- Reflection privacy (Phase 0) ----------
 class TestReflectionPrivacy:

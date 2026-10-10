@@ -105,8 +105,22 @@ const CreateClientIn = z.object({
   password: z.string().min(8).optional(),
 });
 
+// Stage 1 of onboarding ("About you"). Every field but structure_mode is
+// optional -- the whole point of gentle intake is nothing is forced.
+const OnboardingIn = z.object({
+  preferred_name: z.string().optional().nullable(),
+  pronouns: z.string().optional().nullable(),
+  gender_text: z.string().optional().nullable(),
+  age: z.number().int().positive().optional().nullable(), // TODO(confirm): is this field needed at all
+  city: z.string().optional().nullable(),
+  timezone: z.string().optional().nullable(),
+  occupation: z.string().optional().nullable(),
+  structure_mode: z.enum(["step", "single", "call"]).optional().nullable(),
+  stage1_status: z.enum(["not_started", "in_progress", "done", "deferred_to_call"]).optional(),
+});
+
 module.exports = {
   LoginRequest, RegisterRequest, ForgotPasswordRequest, ResetPasswordRequest,
   AppointmentIn, ConsultationRequestIn, SessionSummaryIn, ReflectionIn, ReflectionVisibilityIn,
-  HomeworkIn, HomeworkStatusIn, ResourceIn, CreateClientIn,
+  HomeworkIn, HomeworkStatusIn, ResourceIn, CreateClientIn, OnboardingIn,
 };

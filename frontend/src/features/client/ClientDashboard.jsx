@@ -8,6 +8,7 @@ import { Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import upcomingSessionImg from "@/assets/upcoming-session.png";
 import blueberriesBb1 from "@/assets/blueberries-bb1.png";
+import { ONBOARDING } from "@/constants/testIds";
 
 const QUOTES = [
   "Rest is not a reward. It is a form of care.",
@@ -41,6 +42,27 @@ export default function ClientDashboard() {
         Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 17 ? "afternoon" : "evening"}, <span className="bb-italic-serif">{(user?.name || "").split(" ")[0]}.</span>
       </h1>
       <p className="mt-3 text-bb-forest/70 max-w-xl">We saved the small things you left last time. Take your time.</p>
+
+      {/* Stage 2/3 aren't built yet -- this only reflects Stage 1 for now,
+          per the Step 3a scope; the condition will expand as those ship. */}
+      {!loading && data?.onboarding_status && !["done", "deferred_to_call"].includes(data.onboarding_status.stage1) && (
+        <section
+          data-testid={ONBOARDING.card}
+          className="mt-8 bg-bb-mist rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+        >
+          <div>
+            <p className="bb-eyebrow">Before your first session</p>
+            <p className="mt-1.5 text-bb-forest/80">A few gentle questions, whenever you're ready. Nothing is required all at once.</p>
+          </div>
+          <Link
+            to="/portal/welcome"
+            data-testid={ONBOARDING.cardContinue}
+            className="shrink-0 px-6 py-2.5 rounded-full bg-bb-forest text-bb-cream text-sm hover:bg-bb-forest-2 transition-colors text-center"
+          >
+            Continue
+          </Link>
+        </section>
+      )}
 
       {loading ? (
         <p className="mt-10 text-bb-forest/60">Loading your dashboard…</p>
