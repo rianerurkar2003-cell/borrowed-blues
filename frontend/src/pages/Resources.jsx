@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, X } from "lucide-react";
 import resourcesHero from "@/assets/resources-hero.png";
-import copingIceInHand from "@/assets/coping-ice-in-hand.png";
-import copingColdWaterSplash from "@/assets/coping-cold-water-splash.png";
-import copingButterflyHug from "@/assets/coping-butterfly-hug.png";
-import copingGrounding from "@/assets/coping-grounding.png";
+import copingIceInHand from "@/assets/coping-ice-in-hand.jpg";
+import copingColdWaterSplash from "@/assets/coping-cold-water-splash.jpg";
+import copingButterflyHug from "@/assets/coping-butterfly-hug.jpg";
+import copingGrounding from "@/assets/coping-grounding.jpg";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 /* ---------- content ---------- */

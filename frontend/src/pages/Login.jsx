@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { http } from "@/lib/http";
 import { toAppError } from "@/lib/errors";
-import loginIllustration from "@/assets/login-illustration.png";
+import loginIllustration from "@/assets/login-illustration.jpg";
 
 const inputClass =
   "mt-2 w-full rounded-xl bg-transparent border border-bb-soft-light/40 px-4 py-3 text-bb-soft-light placeholder:text-bb-soft-light/40 focus:border-bb-soft-light/80 outline-none transition-colors";

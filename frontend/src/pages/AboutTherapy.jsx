@@ -3,7 +3,7 @@ import ConsultationDialog from "@/components/ConsultationDialog";
 import { ArrowRight, Check, X } from "lucide-react";
 import aboutTherapyHero from "@/assets/about-therapy-hero.png";
 import whatIsTherapyImg from "@/assets/what-is-therapy.png";
-import readyToBeginImg from "@/assets/ready-to-begin.png";
+import readyToBeginImg from "@/assets/ready-to-begin.jpg";
 import sessionMeetImg from "@/assets/session-meet.png";
 import sessionShareImg from "@/assets/session-share.png";
 import sessionReflectImg from "@/assets/session-reflect.png";
