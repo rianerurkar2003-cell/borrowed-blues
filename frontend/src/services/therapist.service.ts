@@ -7,6 +7,7 @@ import type {
   GoogleCalendarStatus,
   Homework,
   HomeworkInput,
+  RequestStatusResult,
   Reflection,
   Resource,
   ResourceInput,
@@ -55,9 +56,8 @@ export const therapistService = {
   requests: async (): Promise<ConsultationRequest[]> =>
     (await http.get<ConsultationRequest[]>("/therapist/requests")).data,
 
-  updateRequestStatus: async (id: string, status: ConsultationRequest["status"]): Promise<void> => {
-    await http.patch(`/therapist/requests/${id}`, { status });
-  },
+  updateRequestStatus: async (id: string, status: ConsultationRequest["status"]): Promise<RequestStatusResult> =>
+    (await http.patch<RequestStatusResult>(`/therapist/requests/${id}`, { status })).data,
 
   reflections: async (clientId: string): Promise<Reflection[]> =>
     (await http.get<Reflection[]>("/therapist/reflections", { params: { client_id: clientId } })).data,

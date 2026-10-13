@@ -168,6 +168,21 @@ export interface ConsultationRequestInput {
   preferred_time?: string;
 }
 
+export type AcceptAccountOutcome =
+  | "created"
+  | "existing"
+  | "skipped_under_18"
+  | "skipped_no_email"
+  | "skipped_email_in_use";
+
+export interface RequestStatusResult {
+  ok: boolean;
+  account?: AcceptAccountOutcome;
+  email_sent?: boolean;
+  email?: string;
+  generated_password?: string;
+}
+
 export interface TherapistProfile {
   slug: string;
   name: string;

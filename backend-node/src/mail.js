@@ -1,13 +1,13 @@
 // Outbound email via SMTP. No SMTP_HOST configured -> logs instead of
-// sending, so local dev needs no setup and never blocks on a missing provider.
+// sending (and resolves false), so local dev needs no setup; resolves true once sent.
 "use strict";
 const nodemailer = require("nodemailer");
 const config = require("./config");
 
 async function sendEmail(to, subject, htmlBody, textBody) {
   if (!config.SMTP_HOST) {
-    console.log(`[mail] SMTP not configured; would send to ${JSON.stringify(to)}: ${JSON.stringify(subject)}\n${textBody}`);
-    return;
+    console.log(`[mail] SMTP not configured; would send to ${JSON.stringify(to)}: ${JSON.stringify(subject)}`);
+    return false;
   }
 
   const secure = config.SMTP_PORT === 465;
@@ -26,6 +26,10 @@ async function sendEmail(to, subject, htmlBody, textBody) {
     text: textBody,
     html: htmlBody,
   });
+  return true;
 }
 
-module.exports = { sendEmail };
+const escapeHtml = (v) =>
+  String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+module.exports = { sendEmail, escapeHtml };

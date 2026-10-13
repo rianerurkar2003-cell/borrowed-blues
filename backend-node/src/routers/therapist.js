@@ -13,7 +13,8 @@ const { hashPassword } = require("../security");
 const { validate } = require("../validation/validate");
 const { AppointmentIn, SessionSummaryIn, HomeworkIn, ResourceIn, CreateClientIn } = require("../validation/schemas");
 const google = require("../lib/googleCalendar");
-const { sendEmail } = require("../mail");
+const { sendEmail, escapeHtml } = require("../mail");
+const config = require("../config");
 
 const router = express.Router();
 router.use(requireRole("therapist"));
@@ -136,6 +137,83 @@ async function sendAppointmentConfirmationEmail(appointment, therapistName, meet
   } catch (err) {
     console.error("[mail] appointment confirmation email failed:", err.message);
   }
+}
+
+// TODO(confirm): Anushka to approve this welcome email's wording, and update the
+// onboarding paragraph as Stage 2 (consent) and Stage 3 ship.
+async function sendConsultationAcceptedEmail({ request, email, password, therapistName }) {
+  const first = (request.name || "").trim().split(/\s+/)[0] || "there";
+  const therapistFirst = (therapistName || "Anushka").split(" ")[0];
+  const loginUrl = `${config.FRONTEND_URL}/login`;
+  const timeLine = request.preferred_time
+    ? `You mentioned ${request.preferred_time} might suit you. I'll confirm a time with you shortly.`
+    : "I'll be in touch shortly to find a time that suits you.";
+  const credsText = password
+    ? `Your private space on the Borrowed Blues website is ready.\n\nSign in: ${loginUrl}\nEmail: ${email}\nTemporary password: ${password}\n\nYou can choose your own password any time with "Forgot password?" on the sign-in page.`
+    : `You already have a Borrowed Blues account with this email, so you can sign in as usual: ${loginUrl}`;
+  const onboardingText =
+    "Before our first session, when you're ready: once you've signed in, you'll find a card called \"Before your first session\". " +
+    "It holds a few gentle questions about you and how you'd like us to work together. " +
+    "Take it at your own pace. Nothing is required all at once, and anything you'd rather talk about in session can simply be skipped.";
+
+  const text = [
+    `Hi ${first},`,
+    `Thank you for reaching out. I'd be glad to speak with you, and your request for a consultation call has been accepted. ${timeLine}`,
+    credsText,
+    onboardingText,
+    `Warmly,\n${therapistFirst}`,
+  ].join("\n\n");
+
+  const credsHtml = password
+    ? `<p>Your private space on the Borrowed Blues website is ready.</p>` +
+      `<table style="border-collapse:collapse"><tr><td style="padding:2px 12px 2px 0;color:#555">Sign in</td><td><a href="${escapeHtml(loginUrl)}">${escapeHtml(loginUrl)}</a></td></tr>` +
+      `<tr><td style="padding:2px 12px 2px 0;color:#555">Email</td><td>${escapeHtml(email)}</td></tr>` +
+      `<tr><td style="padding:2px 12px 2px 0;color:#555">Temporary password</td><td><code>${escapeHtml(password)}</code></td></tr></table>` +
+      `<p>You can choose your own password any time with &ldquo;Forgot password?&rdquo; on the sign-in page.</p>`
+    : `<p>You already have a Borrowed Blues account with this email, so you can <a href="${escapeHtml(loginUrl)}">sign in as usual</a>.</p>`;
+  const html =
+    `<p>Hi ${escapeHtml(first)},</p>` +
+    `<p>Thank you for reaching out. I'd be glad to speak with you, and your request for a consultation call has been accepted. ${escapeHtml(timeLine)}</p>` +
+    credsHtml +
+    `<p><strong>Before our first session, when you're ready:</strong> once you've signed in, you'll find a card called &ldquo;Before your first session&rdquo;. ` +
+    `It holds a few gentle questions about you and how you'd like us to work together. Take it at your own pace. ` +
+    `Nothing is required all at once, and anything you'd rather talk about in session can simply be skipped.</p>` +
+    `<p>Warmly,<br/>${escapeHtml(therapistFirst)}</p>`;
+
+  return sendEmail(email, `Your consultation call with ${therapistFirst}`, html, text);
+}
+
+// Creates the client's portal account (when it's safe to) and emails them.
+// Never throws on mail trouble: the therapist gets the credentials back in the
+// response instead, so an SMTP hiccup can't strand a newly created account.
+async function onboardAcceptedRequest(request, therapist) {
+  if (!request.is_adult) return { account: "skipped_under_18" };
+  if (!request.email) return { account: "skipped_no_email" };
+
+  const email = request.email.toLowerCase().trim();
+  const [existing] = await pool.query("SELECT id, role FROM users WHERE email = ?", [email]);
+  const existingUser = existing[0];
+  if (existingUser && existingUser.role !== "client") return { account: "skipped_email_in_use" };
+
+  const password = existingUser ? null : crypto.randomBytes(6).toString("base64url");
+  if (!existingUser) {
+    await pool.query(
+      "INSERT INTO users (id, email, password_hash, name, role) VALUES (?, ?, ?, ?, 'client')",
+      [newId(), email, hashPassword(password), request.name],
+    );
+  }
+
+  let emailSent = false;
+  try {
+    emailSent = await sendConsultationAcceptedEmail({ request, email, password, therapistName: therapist.name });
+  } catch (err) {
+    console.error("[mail] consultation accepted email failed:", err.message);
+  }
+  return {
+    account: existingUser ? "existing" : "created",
+    email_sent: emailSent,
+    ...(password && !emailSent ? { generated_password: password, email } : {}),
+  };
 }
 
 const toAppointment = (r) => withIsoDates(r);
@@ -356,10 +434,15 @@ router.patch(
   "/requests/:reqId",
   asyncHandler(async (req, res) => {
     const status = req.body.status || "new";
-    await pool.query("UPDATE consultation_requests SET status = ? WHERE id = ?", [
-      status, req.params.reqId,
-    ]);
-    res.json({ ok: true });
+    const [[request]] = await pool.query("SELECT * FROM consultation_requests WHERE id = ?", [req.params.reqId]);
+    if (!request) throw new ApiError(404, "Request not found");
+
+    const result = { ok: true };
+    if (status === "accepted" && request.status !== "accepted") {
+      Object.assign(result, await onboardAcceptedRequest(request, req.user));
+    }
+    await pool.query("UPDATE consultation_requests SET status = ? WHERE id = ?", [status, request.id]);
+    res.json(result);
   }),
 );
 

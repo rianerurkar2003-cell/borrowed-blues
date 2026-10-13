@@ -16,3 +16,4 @@ export * from './home';
 export * from './journal';
 export * from './reachOut';
 export * from './onboarding';
+export * from './requests';

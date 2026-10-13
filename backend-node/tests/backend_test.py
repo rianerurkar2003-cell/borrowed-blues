@@ -325,6 +325,69 @@ class TestTherapist:
         assert deleted.status_code == 200, deleted.text
 
 
+# ---------- Accepting a consultation request ----------
+def _submit_request(anon, **overrides):
+    unique = f"TEST_{uuid.uuid4().hex[:8]}"
+    payload = {"name": f"{unique} Person", "email": f"{unique.lower()}@example.com",
+               "preferred_contact": "email", "preferred_language": "English", "is_adult": True}
+    payload.update(overrides)
+    r = anon.post(f"{BASE}/api/consultation-requests", json=payload)
+    assert r.status_code == 200, r.text
+    return r.json()
+
+
+class TestAcceptRequest:
+    def test_accept_creates_account_and_second_accept_does_not_duplicate(self, anon, therapist):
+        req = _submit_request(anon)
+        r = therapist.patch(f"{BASE}/api/therapist/requests/{req['id']}", json={"status": "accepted"})
+        assert r.status_code == 200, r.text
+        body = r.json()
+        assert body["account"] == "created"
+        # No SMTP in the test env, so the credentials come back for the therapist to share.
+        assert body["email_sent"] is False
+        assert body["email"] == req["email"].lower() and body["generated_password"]
+
+        login = requests.Session().post(f"{BASE}/api/auth/login", json={"email": body["email"], "password": body["generated_password"]})
+        assert login.status_code == 200, login.text
+
+        again = therapist.patch(f"{BASE}/api/therapist/requests/{req['id']}", json={"status": "accepted"}).json()
+        assert "account" not in again
+
+        clients = [c for c in therapist.get(f"{BASE}/api/therapist/clients").json() if c["email"] == body["email"]]
+        assert len(clients) == 1
+        therapist.delete(f"{BASE}/api/therapist/clients/{clients[0]['id']}")
+
+    def test_accept_phone_only_request_creates_no_account(self, anon, therapist):
+        unique = f"TEST_{uuid.uuid4().hex[:8]}"
+        req = _submit_request(anon, email=None, phone="+911234567890", preferred_contact="phone_call", name=f"{unique} Phone")
+        body = therapist.patch(f"{BASE}/api/therapist/requests/{req['id']}", json={"status": "accepted"}).json()
+        assert body["account"] == "skipped_no_email"
+        assert "generated_password" not in body
+
+    def test_accept_under_18_request_creates_no_account(self, anon, therapist):
+        req = _submit_request(anon, is_adult=False)
+        body = therapist.patch(f"{BASE}/api/therapist/requests/{req['id']}", json={"status": "accepted"}).json()
+        assert body["account"] == "skipped_under_18"
+        emails = [c["email"] for c in therapist.get(f"{BASE}/api/therapist/clients").json()]
+        assert req["email"].lower() not in emails
+
+    def test_accept_for_existing_client_does_not_reset_their_password(self, anon, therapist):
+        req = _submit_request(anon, email=CLIENT["email"])
+        body = therapist.patch(f"{BASE}/api/therapist/requests/{req['id']}", json={"status": "accepted"}).json()
+        assert body["account"] == "existing"
+        assert "generated_password" not in body
+        assert _login(requests.Session(), CLIENT).status_code == 200
+
+    def test_accept_unknown_request_404(self, therapist):
+        r = therapist.patch(f"{BASE}/api/therapist/requests/{uuid.uuid4()}", json={"status": "accepted"})
+        assert r.status_code == 404
+
+    def test_decline_creates_no_account(self, anon, therapist):
+        req = _submit_request(anon)
+        body = therapist.patch(f"{BASE}/api/therapist/requests/{req['id']}", json={"status": "declined"}).json()
+        assert body == {"ok": True}
+
+
 # ---------- Client flow ----------
 class TestClient:
     def test_dashboard(self, client_sess):
