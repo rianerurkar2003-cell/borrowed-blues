@@ -59,7 +59,15 @@ router.get(
     const [rows] = await pool.query(
       "SELECT * FROM therapist_profile WHERE slug = 'primary' LIMIT 1",
     );
-    res.json(rows[0] ? withIsoDates(rows[0], ["updated_at"]) : {});
+    if (!rows[0]) return res.json({});
+    const profile = withIsoDates(rows[0], ["updated_at"]);
+    // MariaDB returns JSON columns as strings; MySQL returns parsed values.
+    for (const key of ["languages", "areas", "pillars", "qualifications"]) {
+      if (typeof profile[key] === "string") {
+        try { profile[key] = JSON.parse(profile[key]); } catch { /* leave as-is */ }
+      }
+    }
+    res.json(profile);
   }),
 );
 

@@ -39,9 +39,13 @@ export default function ReachOutForm({ defaultReason = "", onCancel, onSuccess }
       .then((p) => {
         setTherapistName((p?.name || "").split(" ")[0] || "");
         if (p?.reply_window_text) setReplyWindowText(p.reply_window_text);
-        if (p?.languages?.length) {
-          setLanguages(p.languages);
-          setForm((f) => ({ ...f, preferred_language: p.languages[0] }));
+        let langs = p?.languages;
+        if (typeof langs === "string") {
+          try { langs = JSON.parse(langs); } catch { langs = null; }
+        }
+        if (Array.isArray(langs) && langs.length) {
+          setLanguages(langs);
+          setForm((f) => ({ ...f, preferred_language: langs[0] }));
         }
       })
       .catch(() => {});
