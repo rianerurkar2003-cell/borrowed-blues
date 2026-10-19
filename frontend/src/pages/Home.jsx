@@ -39,7 +39,7 @@ const FAQS = [
   { q: "What if I need to reschedule?",
     a: "You can request a reschedule from within your client portal or by writing to Anushka directly. We try to be flexible — life moves, and therapy should move with it." },
   { q: "How much does a session cost?",
-    a: "Fees are shared during the consultation call, tailored to the length and type of session. Sliding-scale options are available on request." },
+    a: "My session charges are ₹1,000 per session. They are slightly adjusted for international clients. I also provide sliding scale sessions for students and people from marginalized communities (₹700)." },
   { q: "How do I book my first consultation?",
     a: "Use the 'Book a consultation' button anywhere on this site and send a short note. Anushka usually replies within one to two working days." },
 ];
