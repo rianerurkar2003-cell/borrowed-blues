@@ -17,8 +17,11 @@
  *  - watercolour stamp 6.png         → WatercolorStamp     (tiny mark, dashboard accents)
  */
 
+// Local copy of "home page.webp" with its 1px dark top line and transparent left strip cropped off.
+import estuaryImg from "@/assets/home-hero.webp";
+
 const ASSET = {
-  estuary:      "https://customer-assets-wrfwihn1.emergentagent.net/job_calm-therapy-app/artifacts/tn8yiytw_home%20page.webp",
+  estuary:      estuaryImg,
   river:        "https://customer-assets-cm19k8pv.emergentagent.net/job_5324cc8f-7830-4d4f-b5e3-d39decfbd68c/artifacts/12pmwvam_About%20therapy%20art.png",
   ripple:       "https://customer-assets-wrfwihn1.emergentagent.net/job_calm-therapy-app/artifacts/cc1b59cn_watercolour%20stamp%209.png",
   bird:         "https://customer-assets-wrfwihn1.emergentagent.net/job_calm-therapy-app/artifacts/paqx9jpy_Watercolour%20stamp%203.png",

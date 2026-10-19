@@ -17,7 +17,8 @@ const JOURNEY = [
   { label: "Learn",   Art: WatercolorBird },
   { label: "Book",    Art: WatercolorPair },
   { label: "Session", Art: WatercolorEucalyptus },
-  { label: "Reflect", Art: WatercolorRipple },
+  // Zoomed so the artwork's paper edge and dark fringe fall outside the circle.
+  { label: "Reflect", Art: WatercolorRipple, artClassName: "scale-[1.4]" },
   { label: "Growth",  Art: WatercolorSapling },
 ];
 
@@ -175,7 +176,7 @@ export default function Home() {
             </svg>
 
             <ol className="relative grid grid-cols-1 md:grid-cols-5 gap-10 md:gap-4 items-start">
-              {JOURNEY.map(({ label, Art }, i) => (
+              {JOURNEY.map(({ label, Art, artClassName = "" }, i) => (
                 <li
                   key={label}
                   data-testid={`journey-${label.toLowerCase()}`}
@@ -185,7 +186,7 @@ export default function Home() {
                   }`}
                 >
                   <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full overflow-hidden bg-bb-cream/60 backdrop-blur-sm shadow-soft [&_img]:object-cover">
-                    <Art className="w-full h-full" />
+                    <Art className={`w-full h-full ${artClassName}`} />
                   </div>
                   <p className="mt-4 font-serif text-lg md:text-xl text-bb-teal">{label}</p>
                 </li>
